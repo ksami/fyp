@@ -1,7 +1,8 @@
 WebGL
 =====
 ## Intro
-A JavaScript API for rendering interactive 3D computer graphics and 2D graphics within any compatible web browser without the use of plug-ins.[1](https://en.wikipedia.org/wiki/WebGL) The WebGL API may be too tedious to use directly without some utility libraries.
+A JavaScript API for rendering interactive 3D computer graphics and 2D graphics within any compatible web browser without the use of plug-ins.[1](https://en.wikipedia.org/wiki/WebGL)  
+The WebGL API may be too tedious to use directly without some utility libraries.
 
 
 ## Libraries
