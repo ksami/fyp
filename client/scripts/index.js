@@ -5,11 +5,11 @@
 var SPEED_MOVE      = 20;       // m/s
 var SPEED_TURN      = Math.PI;  // rad/s
 var LENGTH_HALL     = 150;      // m
-var BREADTH_HALL    = 100;      // m
+var BREADTH_HALL    = 150;      // m
 var HEIGHT_HALL     = 10;        // m
 var LENGTH_ROOM     = 50;      // m
 var BREADTH_ROOM    = 50;      // m
-var HEIGHT_ROOM     = 7;        // m
+var HEIGHT_ROOM     = 9;        // m
 
 
 /////////////HALL
@@ -36,7 +36,7 @@ function init(){
 
     // Camera
     //args: fov, aspect ratio, near, far
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1100);
 
 
     // Renderer
@@ -59,14 +59,9 @@ function init(){
     controls.addEventListener("change", render);
 
 
-
     // Lights
     var ambientLight = new THREE.AmbientLight(0xa0a0a0);
     scene.add(ambientLight);
-
-    var pointLight = new THREE.PointLight(0x999999, 7, LENGTH_ROOM/4*3);
-    pointLight.position.set(0, 2*HEIGHT_ROOM, 0);
-    scene.add(pointLight);
 
 
     // Cube
@@ -89,14 +84,14 @@ function init(){
     scene.add(floor);
 
     // Hall Walls
-    drawWalls(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL);
+    drawRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL);
 
     // Rooms
-    drawWalls(new THREE.Vector3(0,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+    drawRoom(new THREE.Vector3(LENGTH_HALL-LENGTH_ROOM, 0, BREADTH_HALL-BREADTH_ROOM), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
 
 
     // Skybox
-    var skyBoxGeometry = new THREE.BoxGeometry(10000, 10000, 10000);
+    var skyBoxGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
     var skyBoxMaterial = new THREE.MeshBasicMaterial({color: 0x9999ff, side: THREE.BackSide});
     var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
     scene.add(skyBox);
@@ -204,20 +199,28 @@ function detectCollision(obj, collidableMeshList){
 
 
 /**
- * Creates 4 walls, adds walls to collidables list
+ * Creates 4 walls and a point light, adds walls to collidables list
  * @param  {THREE.Vector3} centre - Centre of the room
  * @param  {number} length - Length of the room in the x-axis
  * @param  {number} height - Height of the room in the y-axis
  * @param  {number} breadth - Breadth of the walls in the z-axis
  */
-function drawWalls(centre, length, height, breadth){
+function drawRoom(centre, length, height, breadth){
+    var offsetX = centre.x/2;
+    var offsetY = centre.y/2;
+    var offsetZ = centre.z/2;
+
+
+    // Lights
+    var pointLight = new THREE.PointLight(0x999999, 5, length*3/4);
+    pointLight.position.set(offsetX, offsetY + 2*height, offsetZ);
+    scene.add(pointLight);
+
+
     // Walls
     var moveX = length/2;
     var moveY = height/2;
     var moveZ = breadth/2;
-    var offsetX = centre.x/2;
-    var offsetY = centre.y/2;
-    var offsetZ = centre.z/2;
 
     var wallLengthGeometry = new THREE.PlaneGeometry(length, height);
     var wallBreadthGeometry = new THREE.PlaneGeometry(breadth, height);
@@ -233,9 +236,9 @@ function drawWalls(centre, length, height, breadth){
     walls[3].rotation.y = Math.PI/2;
 
     walls[0].position.set(offsetX, moveY+offsetY, moveZ+offsetZ);
-    walls[1].position.set(offsetX, moveY+offsetY, -(moveZ+offsetZ));
+    walls[1].position.set(offsetX, moveY+offsetY, -moveZ+offsetZ);
     walls[2].position.set(moveX+offsetX, moveY+offsetY, offsetZ);
-    walls[3].position.set(-(moveX+offsetX), moveY+offsetY, offsetZ);
+    walls[3].position.set(-moveX+offsetX, moveY+offsetY, offsetZ);
 
     for (var i = 0; i < walls.length; i++) {
         scene.add(walls[i]);
