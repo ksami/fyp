@@ -1,6 +1,5 @@
-var port = 8080;
-//var ipaddress = 'vposter-i.comp.nus.edu.sg';
-var ipaddress = 'localhost';
+var port = process.env.NODEJS_PORT || 8080;
+var ipaddress = process.env.NODEJS_IP || 'localhost';
 var _fileindex = __dirname + '/client/index.html';
 
 // Dependencies
