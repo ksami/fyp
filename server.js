@@ -1,5 +1,5 @@
 var port = 8080;
-var ipaddress = '127.0.0.1';
+var ipaddress = 'localhost';
 var _fileindex = __dirname + '/client/index.html';
 
 // Dependencies
