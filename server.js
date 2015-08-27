@@ -1,4 +1,5 @@
 var port = 8080;
+//var ipaddress = 'vposter-i.comp.nus.edu.sg';
 var ipaddress = 'localhost';
 var _fileindex = __dirname + '/client/index.html';
 
