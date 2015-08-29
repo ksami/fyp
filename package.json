@@ -1,0 +1,10 @@
+{
+  "name": "vposter",
+  "dependencies": {
+    "express": "^4.13.3"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js"
+}
