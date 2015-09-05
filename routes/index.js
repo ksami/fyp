@@ -9,6 +9,7 @@ var keystone = require('keystone'),
 // Common Middleware
 keystone.pre('routes', middleware.initErrorHandlers);
 keystone.pre('routes', middleware.initLocals);
+keystone.pre('routes', middleware.handleSocketio);
 keystone.pre('render', middleware.flashMessages);
  
 // Handle 404 errors
@@ -36,6 +37,6 @@ exports = module.exports = function(app) {
     
     app.get('/', routes.views.index);
     app.all('/event', routes.views.event);
-    //app.get('/event/:event', routes.views.event);
+    //app.get('/event/:id', routes.views.event);
     app.all('/createEvent', routes.views.createEvent);
 }

@@ -1,3 +1,9 @@
+//////////////
+// Socketio //
+//////////////
+var socket = io();
+
+
 ///////////////
 // Constants //
 ///////////////
@@ -12,7 +18,7 @@ var BREADTH_ROOM    = 50;      // m
 var HEIGHT_ROOM     = 9;        // m
 
 
-/////////////HALL
+/////////////
 // Globals //
 /////////////
 var container, scene, camera, renderer, controls;

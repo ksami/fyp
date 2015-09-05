@@ -67,3 +67,23 @@ exports.flashMessages = function(req, res, next) {
     next();
     
 };
+
+/**
+ *   Socketio server-side events
+ */
+exports.handleSocketio = function(req, res, next) {
+
+    var io = keystone.get('io');
+    var username = req.user.name.first + ' ' + req.user.name.last;
+
+    io.on('connection', function(socket){
+        console.log('--- ' + username + ' connected');
+
+        socket.on('disconnect', function(){
+            console.log('--- ' + username + ' disconnected');
+        });
+    });
+
+
+    next();
+};
