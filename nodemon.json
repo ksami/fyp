@@ -1,4 +1,3 @@
 {
   "verbose": true,
-  "ignore": ["docs/*", "data/*", "node_modules/*"],
-}
+  "ignore": ["docs/*", "data/*", "node_modules/*", "*.swp", ".git/*"]

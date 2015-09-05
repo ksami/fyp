@@ -17,6 +17,11 @@ exports.initLocals = function(req, res, next) {
     
     // Add your own local variables here
     
+    //navbar links
+    locals.navLinks = [
+        { label: 'Home', key: 'home', href: '/' }
+    ];
+    
     next();
     
 };
