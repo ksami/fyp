@@ -1,0 +1,14 @@
+//- Template for home page view
+
+extends ../layouts/base
+ 
+block intro
+    h1 intro!
+
+block content
+    #login
+        a(href='/keystone') Login
+    #event
+        a(href='/event') View Event
+    #createEvent
+        a(href='/createEvent') Create Event

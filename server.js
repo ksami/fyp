@@ -1,19 +1,43 @@
-var port = process.env.NODEJS_PORT || 8080;
-var ipaddress = process.env.NODEJS_IP || 'localhost';
-var _fileindex = __dirname + '/client/index.html';
+////////////
+// Server //
+////////////
 
-// Dependencies
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-app.use(express.static(__dirname + '/client'));
+var keystone = require('keystone');
+keystone.init({
+  
+  'name': 'vPoster',
+  'brand': 'vPoster',
+  
+  'favicon': 'public/favicon.ico',
+  'static': 'public',
+  
+  'views': 'templates/views',
+  'view engine': 'jade',
+  
+  'auto update': true,
+  'mongo': 'mongodb://localhost/vposter',
+  
+  'session': true,
+  'auth': true,
+  'user model': 'User',
+  'cookie secret': '707f792d71de714353a68c9339e1f2000064eec7'
+  
+});
+ 
+require('./models');
+ 
+keystone.set('routes', require('./routes'));
 
-// Listen to <port>
-http.listen(port, ipaddress, function(){
-    console.log('listening on ' + ipaddress + ':' + port);
+//after sign-in, where are they redirected to?
+keystone.set('signin redirect', function(user, req, res){
+  var url = (user.canAccessKeystone || user.isAdmin) ? '/keystone' : '/createEvent';
+  res.redirect(url);
+});
+ 
+// Configure the navigation bar in Keystone's Admin UI
+keystone.set('nav', {
+  'events': 'events',
+  'users': 'users'
 });
 
-// Route handler
-app.get('/',function(req, res){
-    res.sendfile(_fileindex);
-});
+keystone.start();
