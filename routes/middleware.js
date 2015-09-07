@@ -74,8 +74,10 @@ exports.flashMessages = function(req, res, next) {
 exports.handleSocketio = function(req, res, next) {
 
     var io = keystone.get('io');
-    var username = req.user.name.first + ' ' + req.user.name.last;
+    var username = req.ip;
+    res.locals.eventname = 'Event Name 1';
 
+    //connection occurs only when client loads /templates/views/event.jade
     io.on('connection', function(socket){
         console.log('--- ' + username + ' connected');
 
