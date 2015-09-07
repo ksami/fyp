@@ -1,24 +1,15 @@
-//////////////
-// Socketio //
-//////////////
-var socket = io();
-socket.on('eventDetails', function(event){
-    console.log('+++ eventDetails received');
-    console.log(event);
-})
-
-
 ///////////////
 // Constants //
 ///////////////
 // 1m = 1 unit in any axis
 var SPEED_MOVE      = 20;       // m/s
 var SPEED_TURN      = Math.PI;  // rad/s
-var LENGTH_HALL     = 150;      // m
+var LENGTH_HALL     = 300;      // m
 var BREADTH_HALL    = 150;      // m
 var HEIGHT_HALL     = 10;        // m
-var LENGTH_ROOM     = 50;      // m
-var BREADTH_ROOM    = 50;      // m
+var NUM_ROOMS       = 4;        // default value
+var LENGTH_ROOM     = LENGTH_HALL/(NUM_ROOMS/2);
+var BREADTH_ROOM    = BREADTH_HALL/2;
 var HEIGHT_ROOM     = 9;        // m
 
 
@@ -97,7 +88,12 @@ function init(){
     drawRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL);
 
     // Rooms
-    drawRoom(new THREE.Vector3(LENGTH_HALL-LENGTH_ROOM, 0, BREADTH_HALL-BREADTH_ROOM), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+    for (var i = (-NUM_ROOMS/2)+1; i < NUM_ROOMS/2; i+=2){
+        var centre = new THREE.Vector3((i*LENGTH_ROOM)/2, 0, ((BREADTH_HALL/2) - (BREADTH_ROOM/2)));
+        drawRoom(centre, LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+        centre.z = -((BREADTH_HALL/2) - (BREADTH_ROOM/2));
+        drawRoom(centre, LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+    }
 
 
     // Skybox
@@ -216,9 +212,15 @@ function detectCollision(obj, collidableMeshList){
  * @param  {number} breadth - Breadth of the walls in the z-axis
  */
 function drawRoom(centre, length, height, breadth){
-    var offsetX = centre.x/2;
-    var offsetY = centre.y/2;
-    var offsetZ = centre.z/2;
+    var offsetX = centre.x;
+    var offsetY = centre.y;
+    var offsetZ = centre.z;
+
+    var cubeGeometry = new THREE.BoxGeometry(1,1,1);
+    var cubeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(offsetX, offsetY, offsetZ);
+    scene.add(cube);
 
 
     // Lights
@@ -234,13 +236,14 @@ function drawRoom(centre, length, height, breadth){
 
     var wallLengthGeometry = new THREE.PlaneGeometry(length, height);
     var wallBreadthGeometry = new THREE.PlaneGeometry(breadth, height);
-    var wallMaterial = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
+    var wallMaterial1 = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
+    var wallMaterial2 = new THREE.MeshPhongMaterial({color: 0x009999, side: THREE.DoubleSide});
 
     var walls = [];
-    walls.push(new THREE.Mesh(wallLengthGeometry, wallMaterial));
-    walls.push(new THREE.Mesh(wallLengthGeometry, wallMaterial));
-    walls.push(new THREE.Mesh(wallBreadthGeometry, wallMaterial));
-    walls.push(new THREE.Mesh(wallBreadthGeometry, wallMaterial));
+    walls.push(new THREE.Mesh(wallLengthGeometry, wallMaterial1));
+    walls.push(new THREE.Mesh(wallLengthGeometry, wallMaterial1));
+    walls.push(new THREE.Mesh(wallBreadthGeometry, wallMaterial2));
+    walls.push(new THREE.Mesh(wallBreadthGeometry, wallMaterial2));
 
     walls[2].rotation.y = Math.PI/2;
     walls[3].rotation.y = Math.PI/2;
@@ -257,8 +260,22 @@ function drawRoom(centre, length, height, breadth){
 }
 
 
-/////////////
-// Execute //
-/////////////
-init();
-run();
+//////////////
+// Socketio //
+//////////////
+var socket = io();
+socket.on('eventDetails', function(event){
+    console.log('+++ eventDetails received');
+    console.log(event);
+    document.getElementById('loading').innerHTML = '';
+
+    NUM_ROOMS = event.num;
+    LENGTH_ROOM = LENGTH_HALL/(NUM_ROOMS/2);
+    BREADTH_ROOM = BREADTH_HALL/3;
+
+    /////////////
+    // Execute //
+    /////////////
+    init();
+    run();
+});
