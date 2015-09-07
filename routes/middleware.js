@@ -67,25 +67,3 @@ exports.flashMessages = function(req, res, next) {
     next();
     
 };
-
-/**
- *   Socketio server-side events
- */
-exports.handleSocketio = function(req, res, next) {
-
-    var io = keystone.get('io');
-    var username = req.ip;
-    res.locals.eventname = 'Event Name 1';
-
-    //connection occurs only when client loads /templates/views/event.jade
-    io.on('connection', function(socket){
-        console.log('--- ' + username + ' connected');
-
-        socket.on('disconnect', function(){
-            console.log('--- ' + username + ' disconnected');
-        });
-    });
-
-
-    next();
-};

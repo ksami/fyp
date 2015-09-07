@@ -9,7 +9,6 @@ var keystone = require('keystone'),
 // Common Middleware
 keystone.pre('routes', middleware.initErrorHandlers);
 keystone.pre('routes', middleware.initLocals);
-keystone.pre('routes', middleware.handleSocketio);
 keystone.pre('render', middleware.flashMessages);
  
 // Handle 404 errors

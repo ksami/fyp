@@ -2,6 +2,10 @@
 // Socketio //
 //////////////
 var socket = io();
+socket.on('eventDetails', function(event){
+    console.log('+++ eventDetails received');
+    console.log(event);
+})
 
 
 ///////////////
