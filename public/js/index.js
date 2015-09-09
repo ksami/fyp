@@ -212,15 +212,10 @@ function detectCollision(obj, collidableMeshList){
  * @param  {number} breadth - Breadth of the walls in the z-axis
  */
 function drawRoom(centre, length, height, breadth){
+    //TODO: leave space for door!
     var offsetX = centre.x;
     var offsetY = centre.y;
     var offsetZ = centre.z;
-
-    var cubeGeometry = new THREE.BoxGeometry(1,1,1);
-    var cubeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    cube.position.set(offsetX, offsetY, offsetZ);
-    scene.add(cube);
 
 
     // Lights
