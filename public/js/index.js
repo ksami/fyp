@@ -259,9 +259,11 @@ function drawRoom(centre, length, height, breadth){
 // Socketio //
 //////////////
 var socket = io();
-socket.on('connect', function(){
-    console.log('connected');
+socket.on('syn', function(){
     socket.emit('ack');
+});
+socket.on('syn-ack', function(){
+    console.log('connected');
 });
 socket.on('disconnect', function(){
     console.log('disconnected');
