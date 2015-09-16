@@ -4,6 +4,10 @@
 
 var socketio = require('socket.io');
 var keystone = require('keystone');
+var debugsocket = require('debug')('socket');
+var debugdb = require('debug')('db');
+var debug = require('debug')('info');
+
 keystone.init({
 
     'name': 'vPoster',
@@ -55,13 +59,6 @@ keystone.start({
             session(socket.handshake, {}, next);
         });
 
-        // console.log('app');
-        // console.log(keystone.app);
-
-        console.log('session options');
-        console.log(keystone.get('session options'));
-        // var username = req.ip;
-
 
         function queryEventDetails(socket, eventid){
             //find details of Event by querying db
@@ -70,16 +67,16 @@ keystone.start({
                 .where('name').equals(eventid)
                 .exec(function(err, event){
                     if(err){
-                        console.log('+++ error');
-                        console.log(err);
+                        debugdb('+++ db error')
+                        debugdb(err);
                     }
                     else{
                         if(event === null){
-                            console.log('+++ no results');
+                            debugdb('+++ no results');
                         }
                         else{
-                            console.log('+++ data found');
-                            console.log(event);
+                            debugdb('+++ data found');
+                            debugdb(event);
                             socket.emit('eventDetails', event);
                         }
                     }
@@ -87,7 +84,7 @@ keystone.start({
         }
         
         io.on('connect', function(socket){
-            console.log('--- ' + socket.id + ' connected from ');
+            debugsocket('--- ' + socket.id + ' connected from ');
             socket.emit('syn');
             
             // session.eventid set in route controller for event
@@ -95,10 +92,10 @@ keystone.start({
                 socket.emit('syn-ack');
                 queryEventDetails(socket, socket.handshake.session.eventid);
             });
-            console.log(socket.handshake.session);
+            debugsocket(socket.handshake.session);
 
             socket.on('disconnect', function(){
-                console.log('--- ' + socket.id + ' disconnected from ');
+                debugsocket('--- ' + socket.id + ' disconnected from ');
             });
         });
     }

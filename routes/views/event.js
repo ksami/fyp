@@ -22,45 +22,6 @@ exports = module.exports = function(req, res) {
         res.locals.eventname = eventid;
         req.session.eventid = eventid;
     
-        //establish SocketIO connection
-        // var io = keystone.get('io');
-        // var username = req.ip;
-    
-        // io.on('connect', function(socket, username, eventid){
-        //     console.log('--- ' + socket.id + ' connected from ' + username);
-            
-        //     // socket.on('ack', queryEventDetails);
-
-        //     function queryEventDetails(){
-        //         //find details of Event by querying db
-        //         Event.model.findOne()
-        //             .where('name').equals(eventid)
-        //             .exec(function(err, event){
-        //                 if(err){
-        //                     console.log('+++ error');
-        //                     console.log(err);
-        //                 }
-        //                 else{
-        //                     if(event === null){
-        //                         console.log('+++ no results');
-        //                     }
-        //                     else{
-        //                         console.log('+++ data found');
-        //                         console.log(event);
-        //                         socket.emit('eventDetails', event);
-        //                     }
-        //                 }
-        //             });
-        //     }
-        //     queryEventDetails();
-    
-
-        //     socket.on('disconnect', function(){
-        //         console.log('--- ' + socket.id + ' disconnected from ' + username);
-        //         socket.removeListener('ack', queryEventDetails);
-        //     });
-        // });
-
         next();
     });
 
