@@ -44,5 +44,62 @@ keystone.set('nav', {
 keystone.start({
     onHttpServerCreated: function(){
         keystone.set('io', socketio.listen(keystone.httpServer));
+    },
+
+    onStart: function(){
+        //establish SocketIO connection
+        var io = keystone.get('io');
+        var session = keystone.get('express session');
+
+        io.use(function(socket, next){
+            session(socket.handshake, {}, next);
+        });
+
+        // console.log('app');
+        // console.log(keystone.app);
+
+        console.log('session options');
+        console.log(keystone.get('session options'));
+        // var username = req.ip;
+
+
+        function queryEventDetails(socket, eventid){
+            //find details of Event by querying db
+            var Event = keystone.list('Event');
+            Event.model.findOne()
+                .where('name').equals(eventid)
+                .exec(function(err, event){
+                    if(err){
+                        console.log('+++ error');
+                        console.log(err);
+                    }
+                    else{
+                        if(event === null){
+                            console.log('+++ no results');
+                        }
+                        else{
+                            console.log('+++ data found');
+                            console.log(event);
+                            socket.emit('eventDetails', event);
+                        }
+                    }
+                });
+        }
+        
+        io.on('connect', function(socket){
+            console.log('--- ' + socket.id + ' connected from ');
+            socket.emit('syn');
+            
+            // session.eventid set in route controller for event
+            socket.on('ack', function(){
+                socket.emit('syn-ack');
+                queryEventDetails(socket, socket.handshake.session.eventid);
+            });
+            console.log(socket.handshake.session);
+
+            socket.on('disconnect', function(){
+                console.log('--- ' + socket.id + ' disconnected from ');
+            });
+        });
     }
 });

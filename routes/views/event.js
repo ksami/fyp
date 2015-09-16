@@ -6,48 +6,66 @@ var keystone = require('keystone'),
     Event = keystone.list('Event');
  
 exports = module.exports = function(req, res) {
-    
+
     var view = new keystone.View(req, res);
 
-    var eventname = '1';
-    res.locals.eventname = eventname;
-
-
-    var io = keystone.get('io');
-    var username = req.ip;
-
-    //establish SocketIO connection
-    io.on('connection', function(socket){
-        console.log('--- ' + username + ' connected');
-        
-        //find details of Event by querying db
-        Event.model.find()
-            .where('name', eventname)
-            .exec(function(err, events){
-                if(err){
-                    console.log('+++ error');
-                    console.log(err);
-                }
-                else{
-                    if(events.length === 0){
-                        console.log('+++ no results');
-                    }
-                    else{
-                        console.log('+++ data found');
-                        console.log(events[0]);
-                        socket.emit('eventDetails', events[0]);
-                    }
-                }
-            });
-
-
-        socket.on('disconnect', function(){
-            console.log('--- ' + username + ' disconnected');
-        });
+    view.on('init', function(next){
+        // ensure logged in
+        if (!req.user) {
+            return res.redirect('/keystone/signin');
+        }
+        next();
     });
 
+    view.on('get', function(next){
+        var eventid = req.params.id;
+        res.locals.eventname = eventid;
+        req.session.eventid = eventid;
+    
+        //establish SocketIO connection
+        // var io = keystone.get('io');
+        // var username = req.ip;
+    
+        // io.on('connect', function(socket, username, eventid){
+        //     console.log('--- ' + socket.id + ' connected from ' + username);
+            
+        //     // socket.on('ack', queryEventDetails);
+
+        //     function queryEventDetails(){
+        //         //find details of Event by querying db
+        //         Event.model.findOne()
+        //             .where('name').equals(eventid)
+        //             .exec(function(err, event){
+        //                 if(err){
+        //                     console.log('+++ error');
+        //                     console.log(err);
+        //                 }
+        //                 else{
+        //                     if(event === null){
+        //                         console.log('+++ no results');
+        //                     }
+        //                     else{
+        //                         console.log('+++ data found');
+        //                         console.log(event);
+        //                         socket.emit('eventDetails', event);
+        //                     }
+        //                 }
+        //             });
+        //     }
+        //     queryEventDetails();
+    
+
+        //     socket.on('disconnect', function(){
+        //         console.log('--- ' + socket.id + ' disconnected from ' + username);
+        //         socket.removeListener('ack', queryEventDetails);
+        //     });
+        // });
+
+        next();
+    });
 
     
     view.render('event');
     
 }
+

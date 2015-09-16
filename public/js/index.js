@@ -259,13 +259,22 @@ function drawRoom(centre, length, height, breadth){
 // Socketio //
 //////////////
 var socket = io();
+socket.on('connect', function(){
+    console.log('connected');
+    socket.emit('ack');
+});
+socket.on('disconnect', function(){
+    console.log('disconnected');
+});
+
 socket.on('eventDetails', function(event){
     console.log('+++ eventDetails received');
     console.log(event);
     document.getElementById('loading').innerHTML = '';
 
     // constrain number of rooms to even number
-    NUM_ROOMS = (event.num%2) ? event.num+1 : event.num;
+    var num = parseInt(event.num);
+    NUM_ROOMS = (num%2) ? num+1 : num;
     LENGTH_ROOM = LENGTH_HALL/(NUM_ROOMS/2);
     BREADTH_ROOM = BREADTH_HALL/3;
 
