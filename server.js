@@ -35,7 +35,16 @@ keystone.set('routes', require('./routes'));
 
 //after sign-in, where are they redirected to?
 keystone.set('signin redirect', function(user, req, res){
-    var url = (user.canAccessKeystone || user.isAdmin) ? '/keystone' : '/createEvent';
+    var url = '';
+    if (user.canAccessKeystone || user.isAdmin){
+        url = '/keystone';
+    }
+    else if(user.isOrganiser){
+        url = '/createEvent';
+    }
+    else if(user.isParticipant || user.isPublic){
+        url = '/event/1';
+    }
     res.redirect(url);
 });
 
@@ -84,7 +93,7 @@ keystone.start({
         }
         
         io.on('connect', function(socket){
-            debugsocket('--- ' + socket.id + ' connected from ');
+            debugsocket('--- ' + socket.id + ' connected');
             socket.emit('syn');
             
             // session.eventid set in route controller for event
@@ -95,7 +104,7 @@ keystone.start({
             debugsocket(socket.handshake.session);
 
             socket.on('disconnect', function(){
-                debugsocket('--- ' + socket.id + ' disconnected from ');
+                debugsocket('--- ' + socket.id + ' disconnected');
             });
         });
     }
