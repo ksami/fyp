@@ -42,7 +42,10 @@ keystone.set('signin redirect', function(user, req, res){
     else if(user.isOrganiser){
         url = '/createEvent';
     }
-    else if(user.isParticipant || user.isPublic){
+    else if(user.isParticipant){
+        url = '/dashboard';
+    }
+    else if(user.isPublic){
         url = '/event/1';
     }
     res.redirect(url);

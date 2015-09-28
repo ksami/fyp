@@ -45,7 +45,7 @@ exports = module.exports = function(req, res) {
             var email = validated['true'][i];
 
             var newUser = new User.model({
-                name: email,
+                name: {first: email, last: ''},
                 email: email,
                 // TODO: generate random password
                 password: 'pa55w0rd',

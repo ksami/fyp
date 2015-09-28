@@ -38,4 +38,5 @@ exports = module.exports = function(app) {
     // app.all('/event', routes.views.event);
     app.get('/event/:id', routes.views.event);
     app.all('/createEvent', routes.views.createEvent);
+    app.all('/dashboard', routes.views.dashboard);
 }

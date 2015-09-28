@@ -1,0 +1,18 @@
+//- Template for Participant's dashboard
+
+extends ../layouts/base
+
+
+block intro
+    h1 Dashboard
+
+block content
+    h4= errorMsg
+
+    if isAuthorized
+        for event in events
+            div
+                h3 Event Name: #{event.name}
+                h4 Num of rooms available: #{event.num}
+
+    
