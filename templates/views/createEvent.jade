@@ -7,9 +7,8 @@ block intro
     h1 create new event
 
 block content
-    h3 Event Details
-    
     if isCreated == false
+        h3 Event Details
         form(name='event-details', method='post')
             input(type='hidden', name='action', value='create-event')
             div.input
@@ -24,7 +23,8 @@ block content
             div.actions
                 input(type='submit', value='add')
     else
-        div    
+        h3 Event successfully created    
+        div
             if failedEmails
                 h4 Invalid Emails:
                 ul
