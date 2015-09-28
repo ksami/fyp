@@ -41,23 +41,25 @@ function init(){
 
 
     // Renderer
-    if (Detector.webgl)
+    if (Detector.webgl){
         renderer = new THREE.WebGLRenderer({antialias:true});
-    else
+    }
+    else{
         renderer = new THREE.CanvasRenderer(); 
+    }
 
     //note: window.innerWidth/2 and window.innerHeight/2 will give half resolution
     //useful for performance intensive
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    container = document.getElementById("threejs");
+    container = document.getElementById('threejs');
     container.appendChild(renderer.domElement);
 
 
     //debug: Mouse Look
     controls = new THREE.OrbitControls(camera);
     controls.damping = 0.2;
-    controls.addEventListener("change", render);
+    controls.addEventListener('change', render);
 
 
     // Lights
@@ -82,7 +84,8 @@ function init(){
     // Rooms
     var room = createRoom(new THREE.Vector3(0,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
     scene.add(room);
-
+    // let room2 = createRoom(new THREE.Vector3(0, 0, LENGTH_ROOM), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+    // scene.add(room2);
 
 
 /*
@@ -113,7 +116,7 @@ function init(){
 
     // Load model
     // var jsonLoader = new THREE.JSONLoader();
-    // jsonLoader.load("models/room.json", function(geometry, materials){
+    // jsonLoader.load('models/room.json', function(geometry, materials){
     //     var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
     //     scene.add(mesh);
     //     collidableMeshList.push(mesh);
@@ -149,24 +152,24 @@ function update(){
     var collisionResult = detectCollision(cube, collidableMeshList);
    
     // move forwards/backwards
-    if(keyboard.pressed("w")){
+    if(keyboard.pressed('w')){
         cube.translateZ(moveDistance);
-        if(collisionResult.isCollided && collisionResult.sideToBlock === "front"){
+        if(collisionResult.isCollided && collisionResult.sideToBlock === 'front'){
             cube.translateZ(-moveDistance);
         }
     }
-    if(keyboard.pressed("s")){
+    if(keyboard.pressed('s')){
         cube.translateZ(-moveDistance);
-        if(collisionResult.isCollided && collisionResult.sideToBlock === "back"){
+        if(collisionResult.isCollided && collisionResult.sideToBlock === 'back'){
             cube.translateZ(moveDistance);
         }
     }
 
     // rotate left/right
-    if(keyboard.pressed("a")){
+    if(keyboard.pressed('a')){
         cube.rotation.y += turnArc;
     }
-    if(keyboard.pressed("d")){
+    if(keyboard.pressed('d')){
         cube.rotation.y -= turnArc;
     }
     
@@ -178,7 +181,7 @@ function update(){
  * @param  {THREE.Mesh[]} collidableMeshList - Array of meshes to test collision against
  * @return  {Object} result - Result of collision
  * @return  {boolean} result.isCollided - true if collision occurred
- * @return  {string} result.sideToBlock - Whether collision occurred on "front", "back" or "none"
+ * @return  {string} result.sideToBlock - Whether collision occurred on 'front', 'back' or 'none'
  */
 function detectCollision(obj, collidableMeshList){
     // collision detection:
@@ -202,20 +205,20 @@ function detectCollision(obj, collidableMeshList){
             //collision for this ray from
             //origin to this vertex
             if(localVertex.z > 0){
-                return {isCollided: true, sideToBlock: "front"};
+                return {isCollided: true, sideToBlock: 'front'};
             }
             else{
-                return {isCollided: true, sideToBlock: "back"};
+                return {isCollided: true, sideToBlock: 'back'};
             }
         }
     }
-    return {isCollided: false, sideToBlock: "none"};
+    return {isCollided: false, sideToBlock: 'none'};
 }
 
 
 /**
  * Creates 4 walls and a point light
- * @param  {THREE.Vector3} corner - Centre of the room
+ * @param  {THREE.Vector3} corner - Bottom left corner of the room
  * @param  {number} length - Length of the room in the x-axis
  * @param  {number} height - Height of the room in the y-axis
  * @param  {number} breadth - Breadth of the walls in the z-axis
@@ -230,9 +233,9 @@ function createRoom(corner, length, height, breadth){
 
     var room = new THREE.Object3D();
 
-    // Lights
-    var pointLight = new THREE.PointLight(0x999999, 5, 100);
-    pointLight.position.set(breadth/2,20,length/2);
+    // Light in the centre of the room
+    var pointLight = new THREE.PointLight(0x999999, 5, 75);
+    pointLight.position.set(x+length/2,y+20,z+breadth/2);
     room.add(pointLight);
 
     var wallLengthGeometry = new THREE.PlaneBufferGeometry(length, height);
@@ -243,13 +246,13 @@ function createRoom(corner, length, height, breadth){
     var wallBreadth1 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
     var wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
     //set corner at (0,0,0)
-    wallLength1.position.set(0,height/2,length/2);
-    wallLength2.position.set(breadth,height/2,length/2);
-    wallBreadth1.position.set(breadth/2,height/2,0);
-    wallBreadth2.position.set(breadth/2,height/2,length);
+    wallLength1.position.set(x+length/2, y+height/2, z);
+    wallLength2.position.set(x+length/2, y+height/2, z+breadth);
+    wallBreadth1.position.set(x, y+height/2, z+breadth/2);
+    wallBreadth2.position.set(x+length, y+height/2, z+breadth/2);
     //rotate about own origin
-    wallLength1.rotation.y = Math.PI/2;
-    wallLength2.rotation.y = Math.PI/2;
+    wallBreadth1.rotation.y = Math.PI/2;
+    wallBreadth2.rotation.y = Math.PI/2;
     // wallBreadth1.rotation.y = Math.PI/2;
     room.add(wallLength1);
     room.add(wallLength2);
