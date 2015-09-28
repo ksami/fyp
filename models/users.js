@@ -8,7 +8,7 @@ var keystone = require('keystone'),
 var User = new keystone.List('User');
  
 User.add({
-    name: { type: Types.Name, required: true, index: true },
+    name: { type: Types.Name },
     email: { type: Types.Email, initial: true, required: true, index: true },
     password: { type: Types.Password, initial: true },
     canAccessKeystone: { type: Boolean, initial: true },
@@ -17,5 +17,7 @@ User.add({
     isParticipant: { type: Boolean, default: false, label: 'Participants' },
     isPublic: { type: Boolean, default: true, label: 'Public' }
 });
- 
+
+User.relationship({ path: 'events', ref: 'Event', refPath: 'participants' });
+
 User.register();

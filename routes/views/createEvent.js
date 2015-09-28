@@ -4,7 +4,8 @@
 
 var keystone = require('keystone'),
     _ = require('underscore'),
-    Event = keystone.list('Event');
+    Event = keystone.list('Event'),
+    User = keystone.list('User');
  
 exports = module.exports = function(req, res) {
     
@@ -28,10 +29,6 @@ exports = module.exports = function(req, res) {
     
     // Create an Event
     view.on('post', { action: 'create-event' }, function(next) {
-        console.log('--- event posting');
-        console.log('--- name: ' + locals.formData.name);
-        console.log('--- num : ' + locals.formData.num);
-        console.log('--- emails : ' + locals.formData.emails);
 
         // validate emails
         var emails = locals.formData.emails.split('\n');
@@ -43,11 +40,31 @@ exports = module.exports = function(req, res) {
         });
 
         // create new User for each email
+        var users = [];
+        for (var i = 0; i < validated['true'].length; i++) {
+            var email = validated['true'][i];
+
+            var newUser = new User.model({
+                name: email,
+                email: email,
+                // TODO: generate random password
+                password: 'pa55w0rd',
+                isParticipant: true
+            });
+            users.push(newUser._id);
+            newUser.save(function(err){
+                if(err){
+                    console.log('--- Error: ');
+                    console.log(err);
+                }
+            });
+        }
+
         // add to Event
         var newEvent = new Event.model({
             name: locals.formData.name,
             num: locals.formData.num,
-            participants: validated['true']
+            participants: users
         });
         newEvent.save(function(err){
             if(err){
@@ -57,32 +74,14 @@ exports = module.exports = function(req, res) {
             }
             else{
                 console.log('--- Event successfully added');
+                locals.failedEmails = validated['false'];
                 locals.isCreated = true;
                 // req.flash('success', 'Your event was successfully created');
                 // return res.redirect('/');
             }
             next();
         });
-        
-        // var newEvent = new Event.model();
-        
-        // var updater = newEvent.getUpdateHandler(req);
-        
-        // updater.process(req.body, {
-        //     fields: 'name',
-        //     flashErrors: true,
-        //     logErrors: true
-        // }, function(err) {
-        //     if (err) {
-        //         data.validationErrors = err.errors;
-        //     } else {
-        //         req.flash('success', 'Your event was created.');
-                
-        //         return res.redirect('/');
-        //     }
-        // });
 
-        // return res.redirect('/');
     });
 
     view.render('createEvent');
