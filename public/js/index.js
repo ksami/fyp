@@ -8,8 +8,8 @@ var LENGTH_HALL     = 300;      // m
 var BREADTH_HALL    = 150;      // m
 var HEIGHT_HALL     = 10;        // m
 var NUM_ROOMS       = 4;        // default value
-var LENGTH_ROOM     = LENGTH_HALL/(NUM_ROOMS/2);
-var BREADTH_ROOM    = BREADTH_HALL/2;
+var LENGTH_ROOM     = 100;
+var BREADTH_ROOM    = 50;
 var HEIGHT_ROOM     = 9;        // m
 
 
@@ -69,7 +69,8 @@ function init(){
     var cubeGeometry = new THREE.BoxGeometry(2,1,1);
     var cubeMaterial = new THREE.MeshPhongMaterial();
     cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    cube.position.set(3,1,-5);
+    cube.position.set(25,1,25);
+    cube.rotation.y = Math.PI/2;
     scene.add(cube);
 
     camera.position.y = 5;
@@ -77,6 +78,14 @@ function init(){
     camera.lookAt(new THREE.Vector3(0,0,4));
     cube.add(camera);
 
+
+    // Rooms
+    var room = createRoom(new THREE.Vector3(0,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+    scene.add(room);
+
+
+
+/*
     // Hall Floor
     var floorGeometry = new THREE.PlaneGeometry(LENGTH_HALL, BREADTH_HALL);
     var floorMaterial = new THREE.MeshBasicMaterial({color: 0x444444});
@@ -94,7 +103,7 @@ function init(){
         centre.z = -((BREADTH_HALL/2) - (BREADTH_ROOM/2));
         drawRoom(centre, LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
     }
-
+*/
 
     // Skybox
     var skyBoxGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
@@ -205,53 +214,51 @@ function detectCollision(obj, collidableMeshList){
 
 
 /**
- * Creates 4 walls and a point light, adds walls to collidables list
- * @param  {THREE.Vector3} centre - Centre of the room
+ * Creates 4 walls and a point light
+ * @param  {THREE.Vector3} corner - Centre of the room
  * @param  {number} length - Length of the room in the x-axis
  * @param  {number} height - Height of the room in the y-axis
  * @param  {number} breadth - Breadth of the walls in the z-axis
+ * @return {THREE.Object3D} room - Dummy room object to group walls and light
  */
-function drawRoom(centre, length, height, breadth){
+function createRoom(corner, length, height, breadth){
     //TODO: leave space for door!
-    var offsetX = centre.x;
-    var offsetY = centre.y;
-    var offsetZ = centre.z;
+    var x = corner.x;
+    var y = corner.y;
+    var z = corner.z;
 
+
+    var room = new THREE.Object3D();
 
     // Lights
-    var pointLight = new THREE.PointLight(0x999999, 5, length*3/4);
-    pointLight.position.set(offsetX, offsetY + 2*height, offsetZ);
-    scene.add(pointLight);
+    var pointLight = new THREE.PointLight(0x999999, 5, 100);
+    pointLight.position.set(breadth/2,20,length/2);
+    room.add(pointLight);
 
+    var wallLengthGeometry = new THREE.PlaneBufferGeometry(length, height);
+    var wallBreadthGeometry = new THREE.PlaneBufferGeometry(breadth, height);
+    var wallMaterial = new THREE.MeshPhongMaterial({color: 0x9999999, side: THREE.DoubleSide});
+    var wallLength1 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
+    var wallLength2 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
+    var wallBreadth1 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
+    var wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
+    //set corner at (0,0,0)
+    wallLength1.position.set(0,height/2,length/2);
+    wallLength2.position.set(breadth,height/2,length/2);
+    wallBreadth1.position.set(breadth/2,height/2,0);
+    wallBreadth2.position.set(breadth/2,height/2,length);
+    //rotate about own origin
+    wallLength1.rotation.y = Math.PI/2;
+    wallLength2.rotation.y = Math.PI/2;
+    // wallBreadth1.rotation.y = Math.PI/2;
+    room.add(wallLength1);
+    room.add(wallLength2);
+    room.add(wallBreadth1);
+    room.add(wallBreadth2);
 
-    // Walls
-    var moveX = length/2;
-    var moveY = height/2;
-    var moveZ = breadth/2;
+    //TODO: add to collidables
 
-    var wallLengthGeometry = new THREE.PlaneGeometry(length, height);
-    var wallBreadthGeometry = new THREE.PlaneGeometry(breadth, height);
-    var wallMaterial1 = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
-    var wallMaterial2 = new THREE.MeshPhongMaterial({color: 0x009999, side: THREE.DoubleSide});
-
-    var walls = [];
-    walls.push(new THREE.Mesh(wallLengthGeometry, wallMaterial1));
-    walls.push(new THREE.Mesh(wallLengthGeometry, wallMaterial1));
-    walls.push(new THREE.Mesh(wallBreadthGeometry, wallMaterial2));
-    walls.push(new THREE.Mesh(wallBreadthGeometry, wallMaterial2));
-
-    walls[2].rotation.y = Math.PI/2;
-    walls[3].rotation.y = Math.PI/2;
-
-    walls[0].position.set(offsetX, moveY+offsetY, moveZ+offsetZ);
-    walls[1].position.set(offsetX, moveY+offsetY, -moveZ+offsetZ);
-    walls[2].position.set(moveX+offsetX, moveY+offsetY, offsetZ);
-    walls[3].position.set(-moveX+offsetX, moveY+offsetY, offsetZ);
-
-    for (var i = 0; i < walls.length; i++) {
-        scene.add(walls[i]);
-        collidableMeshList.push(walls[i]);
-    }
+    return room;
 }
 
 
@@ -272,13 +279,15 @@ socket.on('disconnect', function(){
 socket.on('eventDetails', function(event){
     console.log('+++ eventDetails received');
     console.log(event);
+
+    // get rid of loading message
     document.getElementById('loading').innerHTML = '';
 
     // constrain number of rooms to even number
     var num = parseInt(event.num);
     NUM_ROOMS = (num%2) ? num+1 : num;
-    LENGTH_ROOM = LENGTH_HALL/(NUM_ROOMS/2);
-    BREADTH_ROOM = BREADTH_HALL/3;
+    // LENGTH_ROOM = LENGTH_HALL/(NUM_ROOMS/2);
+    // BREADTH_ROOM = BREADTH_HALL/3;
 
     /////////////
     // Execute //
