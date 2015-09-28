@@ -7,16 +7,20 @@ block intro
 
 block content
     h3 Event Details
-    form(name='event-details', method='post')
-        input(type='hidden', name='action', value='create-event')
-        div.input
-            span.label Name
-            input(type='text', name='name')
-        div.input
-            span.label Number of participants
-            input(type='text', name='num')
-        div.input
-            span.label List of Participants' emails
-            textarea(name='emails', rows='10', cols='50')
-        div.actions
-            input(type='submit', value='add')
+    if isCreated == false
+        form(name='event-details', method='post')
+            input(type='hidden', name='action', value='create-event')
+            div.input
+                span.label Name
+                input(type='text', name='name')
+            div.input
+                span.label Number of participants
+                input(type='text', name='num')
+            div.input
+                span.label List of Participants' emails
+                textarea(name='emails', rows='10', cols='50')
+            div.actions
+                input(type='submit', value='add')
+    else
+        div
+            h4 Event created

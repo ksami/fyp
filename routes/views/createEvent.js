@@ -11,6 +11,20 @@ exports = module.exports = function(req, res) {
     var view = new keystone.View(req, res),
         locals = res.locals;
     locals.formData = req.body || {};
+
+    view.on('init', function(next){
+        // ensure logged in
+        if (!req.user) {
+            return res.redirect('/keystone/signin');
+        }
+        next();
+    });
+
+    view.on('get', function(next){
+        locals.isCreated = false;
+    
+        next();
+    });
     
     // Create an Event
     view.on('post', { action: 'create-event' }, function(next) {
@@ -43,8 +57,9 @@ exports = module.exports = function(req, res) {
             }
             else{
                 console.log('--- Event successfully added');
+                locals.isCreated = true;
                 // req.flash('success', 'Your event was successfully created');
-                return res.redirect('/');
+                // return res.redirect('/');
             }
             next();
         });
