@@ -13,7 +13,7 @@ exports = module.exports = function(req, res) {
         locals = res.locals;
     locals.formData = req.body || {};
 
-    view.on('init', function(next){
+    view.on('get', function(next){
         // ensure logged in
         if (!req.user) {
             return res.redirect('/keystone/signin');
