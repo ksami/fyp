@@ -2,6 +2,7 @@
 // Server //
 ////////////
 
+require('dotenv').load();
 var socketio = require('socket.io');
 var keystone = require('keystone');
 var debugsocket = require('debug')('socket');
@@ -20,12 +21,12 @@ keystone.init({
     'view engine': 'jade',
     
     'auto update': true,
-    'mongo': 'mongodb://localhost/vposter',
+    'mongo': process.env.SERVER_MONGO_CONN,
     
     'session': true,
     'auth': true,
     'user model': 'User',
-    'cookie secret': '707f792d71de714353a68c9339e1f2000064eec7'
+    'cookie secret': process.env.COOKIE_SECRET
   
 });
 

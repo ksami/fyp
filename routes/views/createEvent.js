@@ -3,9 +3,16 @@
 ///////////////////////////////////////////
 
 var keystone = require('keystone'),
-    _ = require('underscore'),
     Event = keystone.list('Event'),
-    User = keystone.list('User');
+    User = keystone.list('User'),
+    crypto = require('crypto'),
+    _ = require('underscore'),
+    emailServer = require('emailjs/email').server.connect({
+       user:    process.env.SERVER_EMAIL_ADD,
+       password:process.env.SERVER_EMAIL_PW,
+       host:    process.env.SERVER_EMAIL_HOST,
+       ssl:     true
+    });
  
 exports = module.exports = function(req, res) {
     
@@ -30,25 +37,27 @@ exports = module.exports = function(req, res) {
     // Create an Event
     view.on('post', { action: 'create-event' }, function(next) {
 
-        // validate emails
         var emails = locals.formData.emails.split('\n');
         var emailsStripped = _.map(emails, function(email){
             return email.trim();
         });
+        // validate emails
         var validated = _.groupBy(emailsStripped, function(email){
-            return email.indexOf('@') !== -1;
+            return /.+@.+\..+/i.test(email);
         });
 
         // create new User for each email
         var users = [];
         for (var i = 0; i < validated['true'].length; i++) {
             var email = validated['true'][i];
+            var name = email.split('@')[0];
+            var pass = crypto.randomBytes(4).toString('hex').slice(0,8);
 
             var newUser = new User.model({
-                name: {first: email, last: ''},
+                name: {first: name, last: ''},
                 email: email,
-                // TODO: generate random password
-                password: 'pa55w0rd',
+                // TODO: hash password?
+                password: pass,
                 isParticipant: true
             });
             users.push(newUser._id);
@@ -58,6 +67,14 @@ exports = module.exports = function(req, res) {
                     console.log(err);
                 }
             });
+
+            // send emails to newly created users
+            emailServer.send({
+               from:    'vPoster <admin@vposter.com>',
+               to:      name + ' ' + email,
+               subject: 'New account created at vPoster',
+               text:    'Username: ' + email + '\nPassword: ' + pass
+            }, function(err, message) { console.log(err || message); });
         }
 
         // add to Event
