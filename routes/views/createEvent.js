@@ -38,81 +38,87 @@ exports = module.exports = function(req, res) {
     view.on('post', { action: 'create-event' }, function(next) {
 
         // parse csv
-        var csv = locals.formData.csv.split('\n');
-        var participants = _.map(csv, function(line){
-            return line.split(',');
-        });
-
-        // validate emails
-        var emailsStripped = _.map(_.map(participants, _.first), function(email){
-            return email.trim();
-        });
-        var emailsValidated = _.groupBy(emailsStripped, function(email){
-            return /.+@.+\..+/i.test(email);
-        });
-
-  
-        // create new User for each email
+        //TODO: no verification of csv
         var users = [];
-        for (var i = 0; i < emailsValidated['true'].length; i++) {
-            var email = emailsValidated['true'][i];
-            var name = email.split('@')[0];
-            var pass = crypto.randomBytes(4).toString('hex').slice(0,8);
+        var failedEmails = [];
+        var categories = {};
+        var csv = locals.formData.csv.split('\n');
 
-            var newUser = new User.model({
-                name: {first: name, last: ''},
-                email: email,
-                password: pass,
-                isParticipant: true
-            });
-            users.push(newUser._id);
-            newUser.save(function(err){
-                if(err){
-                    console.log('--- Error: ');
-                    console.log(err);
+
+        for (var i = 0; i < csv.length; i++) {
+
+            var participant = csv[i].split(',');
+            var email = participant[0].trim();
+
+            // if looks like an email
+            if(/.+@.+\..+/i.test(email)){
+                // create new User for each email
+                var name = email.split('@')[0];
+                var pass = crypto.randomBytes(4).toString('hex').slice(0,8);
+
+                var newUser = new User.model({
+                    name: {first: name, last: ''},
+                    email: email,
+                    password: pass,
+                    isParticipant: true
+                });
+                users.push(newUser._id);
+                newUser.save(function(err){
+                    if(err){
+                        console.log('--- Error: ');
+                        console.log(err);
+                    }
+                });
+
+                // send emails to newly created users
+                //DEBUG:
+                // emailServer.send({
+                //    from:    'vPoster <admin@vposter.com>',
+                //    to:      name + ' ' + email,
+                //    subject: 'New account created at vPoster',
+                //    text:    'Username: ' + email + '\nPassword: ' + pass
+                // }, function(err, message) {
+                //     if(err){
+                //         console.log('--- Error: ');
+                //         console.log(err);
+                //     }
+                //     else{
+                //         console.log('- Email sent: ' + email);
+                //     }
+                // });
+                
+                // categories in the event
+                var category = participant[1].trim();
+                if(categories.hasOwnProperty(category)){
+                    categories[category]++;
                 }
-            });
+                else{
+                    categories[category] = 1;
+                }
+            }
+            else{
+                // email doesn't pass basic verification check, category also won't be added
+                failedEmails.push(email);
+            }
 
-            // send emails to newly created users
-            //DEBUG:
-            // emailServer.send({
-            //    from:    'vPoster <admin@vposter.com>',
-            //    to:      name + ' ' + email,
-            //    subject: 'New account created at vPoster',
-            //    text:    'Username: ' + email + '\nPassword: ' + pass
-            // }, function(err, message) {
-            //     if(err){
-            //         console.log('--- Error: ');
-            //         console.log(err);
-            //     }
-            //     else{
-            //         console.log('- Email sent: ' + email);
-            //     }
-            // });
         }
 
-
-        // categories in the event
+        // calculate number of rooms needed
         var NUM_PLACES = 10;
-        var categories = _.map(_.map(participants, _.last), function(category){
-            return category.trim();
-        });
-        var categoriesUnique = _.uniq(categories);
-        var categoryCount = _.countBy(categories, function(category){
-            return category;
-        });
-
-        var numExtraRooms = _.reduce(_.filter(categoryCount, function(count){
-            return count > NUM_PLACES;
-        }), function(memo, num){
-            return memo + Math.floor(num/NUM_PLACES);
-        }, 0);
+        var numRooms = 0;
+        var categoriesUnique = [];
+        for(var cat in categories){
+            if(categories.hasOwnProperty(cat)){
+                numRooms += Math.ceil(categories[cat]/NUM_PLACES);
+                categoriesUnique.push(cat);
+            }
+        }
 
 
         // add to Event
         var newEvent = new Event.model({
             name: locals.formData.name,
-            numRooms: numExtraRooms + categoriesUnique.length,
+            numRooms: numRooms,
             participants: users,
             categories: categoriesUnique
         });
@@ -124,7 +130,7 @@ exports = module.exports = function(req, res) {
             }
             else{
                 console.log('--- Event successfully added');
-                locals.failedEmails = emailsValidated['false'];
+                locals.failedEmails = failedEmails;
                 locals.isCreated = true;
                 // req.flash('success', 'Your event was successfully created');
                 // return res.redirect('/');
