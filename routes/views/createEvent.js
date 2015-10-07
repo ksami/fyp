@@ -44,8 +44,14 @@ exports = module.exports = function(req, res) {
         var categories = {};
         var csv = locals.formData.csv.split('\n');
 
+        var rowStart = 0;
+        var hasHeader = locals.formData.hasHeader;
+        if(hasHeader === 'on'){
+            rowStart = 1;
+        }
 
-        for (var i = 0; i < csv.length; i++) {
+
+        for (var i = rowStart; i < csv.length; i++) {
 
             var participant = csv[i].split(',');
             var email = participant[0].trim();

@@ -17,6 +17,9 @@ block content
             div.input
                 span.label CSV
                 textarea(name='csv', rows='10', cols='50')
+            div.input
+                input(type='checkbox', name='hasHeader')
+                span.label My data has a header row
             div.actions
                 input(type='submit', value='add')
     else
