@@ -15,6 +15,9 @@ block content
                 span.label Name
                 input(type='text', name='name')
             div.input
+                span.label Categories
+                textarea(name='categories', rows='5', cols='50')
+            div.input
                 span.label CSV
                 textarea(name='csv', rows='10', cols='50')
             div.input
@@ -30,3 +33,8 @@ block content
                 ul
                     for email in failedEmails
                         li= email
+            if failedCategories
+                h4 Invalid Categories:
+                ul
+                    for user in failedCategories
+                        li #{user.email}: #{user.category}
