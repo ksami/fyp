@@ -78,20 +78,23 @@ exports = module.exports = function(req, res) {
 
                 // send emails to newly created users
                 //DEBUG:
-                // emailServer.send({
-                //    from:    'vPoster <admin@vposter.com>',
-                //    to:      name + ' ' + email,
-                //    subject: 'New account created at vPoster',
-                //    text:    'Username: ' + email + '\nPassword: ' + pass
-                // }, function(err, message) {
-                //     if(err){
-                //         console.log('--- Error: ');
-                //         console.log(err);
-                //     }
-                //     else{
-                //         console.log('- Email sent: ' + email);
-                //     }
-                // });
+                emailServer.send({
+                   from:    'vPoster <admin@vposter.com>',
+                   to:      `${name} ${email}`,
+                   subject: 'New account created at vPoster',
+                   text:    `${req.user.name.first} ${req.user.name.last} has created an account for you for the event: ${locals.formData.name}
+                            Login at http://localhost:3000 with the credentials below to edit your details and participate in the event.
+                            Username: ${email}
+                            Password: ${pass}`
+                }, function(err, message) {
+                    if(err){
+                        console.log('--- Error: ');
+                        console.log(err);
+                    }
+                    else{
+                        console.log('- Email sent: ' + email);
+                    }
+                });
                 
                 // categories in the event
                 var category = participant[1].trim();
