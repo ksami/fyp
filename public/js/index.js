@@ -317,7 +317,7 @@ socket.on('eventDetails', function(event){
     document.getElementById('loading').innerHTML = '';
 
     // constrain number of rooms to even number
-    let num = parseInt(event.num);
+    let num = parseInt(event.numRooms);
     NUM_ROOMS = (num%2) ? num+1 : num;
     LENGTH_HALL = LENGTH_ROOM * (NUM_ROOMS / 2);
     BREADTH_HALL = (BREADTH_ROOM * 2) + BREADTH_CORRIDOR;
