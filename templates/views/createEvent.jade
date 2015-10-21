@@ -13,14 +13,19 @@ block content
             form(name='event-details', method='post')
                 input(type='hidden', name='action', value='create-event')
                 .row: .input-field.col.s12
-                    label(for='name') Name
                     input(type='text', name='name')
+                    label(for='name') Name
                 .row: .input-field.col.s12
-                    label(for='categories') Categories
+                    select(name='posterSize')
+                        option(value='A0') A0
+                        option(value='A1') A1
+                    label Size of posters
+                .row: .input-field.col.s12
                     textarea.materialize-textarea(name='categories')
+                    label(for='categories') Categories
                 .row: .input-field.col.s12
-                    label(for='csv') CSV
                     textarea.materialize-textarea(name='csv', rows='10', cols='50')
+                    label(for='csv') CSV
                 .row: .input-field.col.s12
                     input(type='checkbox', name='hasHeader')
                     label(for='hasHeader') My data has a header row
@@ -40,3 +45,9 @@ block content
                     ul
                         for user in failedCategories
                             li #{user.email}: #{user.category}
+
+block js
+    script.
+        $(document).ready(function() {
+            $('select').material_select();
+        });

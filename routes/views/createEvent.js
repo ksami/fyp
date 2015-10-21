@@ -44,7 +44,6 @@ exports = module.exports = function(req, res) {
         var failedCategories = [];
         var categories = {};
         var cats = _.map(locals.formData.categories.split('\n'), (cat)=>{return cat.trim();});
-        console.log('cats ' , cats);
 
         var csv = locals.formData.csv.split('\n');
 
@@ -63,7 +62,6 @@ exports = module.exports = function(req, res) {
 
             // categories in the event
             var category = participant[1].trim();
-            console.log('_.contains(cats, category) ' , _.contains(cats, category));
             if(_.contains(cats, category)){   
                 if(categories.hasOwnProperty(category)){
                     categories[category]++;
@@ -93,24 +91,24 @@ exports = module.exports = function(req, res) {
                     });
 
                     // send emails to newly created users
-                    //DEBUG:
-                    emailServer.send({
-                       from:    'vPoster <admin@vposter.com>',
-                       to:      `${name} ${email}`,
-                       subject: 'New account created at vPoster',
-                       text:    `${req.user.name.first} ${req.user.name.last} has created an account for you for the event: ${locals.formData.name}
-                                Login at http://localhost:3000 with the credentials below to edit your details and participate in the event.
-                                Username: ${email}
-                                Password: ${pass}`
-                    }, function(err, message) {
-                        if(err){
-                            console.log('--- Error: ');
-                            console.log(err);
-                        }
-                        else{
-                            console.log('- Email sent');
-                        }
-                    });
+                    //DEBUG: switch off emails
+                    // emailServer.send({
+                    //    from:    'vPoster <admin@vposter.com>',
+                    //    to:      `${name} ${email}`,
+                    //    subject: 'New account created at vPoster',
+                    //    text:    `${req.user.name.first} ${req.user.name.last} has created an account for you for the event: ${locals.formData.name}
+                    //             Login at http://localhost:3000 with the credentials below to edit your details and participate in the event.
+                    //             Username: ${email}
+                    //             Password: ${pass}`
+                    // }, function(err, message) {
+                    //     if(err){
+                    //         console.log('--- Error: ');
+                    //         console.log(err);
+                    //     }
+                    //     else{
+                    //         console.log('- Email sent');
+                    //     }
+                    // });
                 }
                 else{
                     // email doesn't pass basic verification check, User won't be created
@@ -141,7 +139,8 @@ exports = module.exports = function(req, res) {
             name: locals.formData.name,
             numRooms: numRooms,
             participants: users,
-            categories: categoriesUnique
+            categories: categoriesUnique,
+            posterSize: locals.formData.posterSize
         });
         newEvent.save(function(err){
             if(err){
