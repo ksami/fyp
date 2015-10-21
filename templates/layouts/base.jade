@@ -8,21 +8,26 @@ html
         meta(charset="utf-8")
         meta(name="viewport", content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width")
         
-        title= title || 'My Keystone Website'
+        title= title || "My Keystone Website"
         link(rel="shortcut icon", href="/favicon.ico", type="image/x-icon")
         
+        link(rel="stylesheet", href="http://fonts.googleapis.com/icon?family=Material+Icons")
+        link(rel="stylesheet", href="/css/materialize.min.css", media="screen,projection")
+
         block css
         block head
     body
-        ul.navbar-nav
-            each link in navLinks
-                li(class=(section == link.key ? 'active' : null)): a(href=link.href)= link.label
-            if user
-                li: a(href='/keystone') Open Keystone
-                li: a(href='/keystone/signout') Sign Out
-            else
-                li: a(href='/keystone/signin') Sign In
-        
+        nav: div.nav-wrapper
+            a.brand-logo(href="/") vPoster
+            ul.right.hide-on-med-and-down
+                each link in navLinks
+                    li: a(href=link.href)= link.label
+                if user
+                    li: a(href="/keystone") Open Keystone
+                    li: a(href="/keystone/signout") Sign Out
+                else
+                    li: a(href="/keystone/signin") Sign In
+            
         #body
             
             block intro
@@ -31,6 +36,9 @@ html
             
             block content
         
-        #footer Powered by <a href='http://keystonejs.com', target='_blank'>KeystoneJS</a>.
+        #footer Powered by <a href="http://keystonejs.com", target="_blank">KeystoneJS</a>.
     
+    script(src="https://code.jquery.com/jquery-2.1.1.min.js")
+    script(src="js/materialize.min.js")
+
     block js

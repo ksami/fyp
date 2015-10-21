@@ -7,34 +7,36 @@ block intro
     h1 create new event
 
 block content
-    if isCreated == false
-        h3 Event Details
-        form(name='event-details', method='post')
-            input(type='hidden', name='action', value='create-event')
-            div.input
-                span.label Name
-                input(type='text', name='name')
-            div.input
-                span.label Categories
-                textarea(name='categories', rows='5', cols='50')
-            div.input
-                span.label CSV
-                textarea(name='csv', rows='10', cols='50')
-            div.input
-                input(type='checkbox', name='hasHeader')
-                span.label My data has a header row
-            div.actions
-                input(type='submit', value='add')
-    else
-        h3 Event successfully created
-        div
-            if failedEmails
-                h4 Invalid Emails:
-                ul
-                    for email in failedEmails
-                        li= email
-            if failedCategories
-                h4 Invalid Categories:
-                ul
-                    for user in failedCategories
-                        li #{user.email}: #{user.category}
+    .row
+        if isCreated == false
+            h3 Event Details
+            form(name='event-details', method='post')
+                input(type='hidden', name='action', value='create-event')
+                .row: .input-field.col.s12
+                    label(for='name') Name
+                    input(type='text', name='name')
+                .row: .input-field.col.s12
+                    label(for='categories') Categories
+                    textarea.materialize-textarea(name='categories')
+                .row: .input-field.col.s12
+                    label(for='csv') CSV
+                    textarea.materialize-textarea(name='csv', rows='10', cols='50')
+                .row: .input-field.col.s12
+                    input(type='checkbox', name='hasHeader')
+                    label(for='hasHeader') My data has a header row
+                .row: .input-field.col.s12
+                    button.btn.waves-effect.waves-light(type='submit') Submit
+                        i.material-icons.right send
+        else
+            h3 Event successfully created
+            div
+                if failedEmails
+                    h4 Invalid Emails:
+                    ul
+                        for email in failedEmails
+                            li= email
+                if failedCategories
+                    h4 Invalid Categories:
+                    ul
+                        for user in failedCategories
+                            li #{user.email}: #{user.category}
