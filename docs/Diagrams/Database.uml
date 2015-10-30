@@ -1,0 +1,28 @@
+title Database
+
+object User {
+    {static} email
+    password
+    canAccessKeystone
+    isAdmin
+    isOrganiser
+    isParticipant
+    isPublic
+    name
+}
+
+object Location {
+    {static} id
+    category
+    poster
+}
+
+object Event {
+    {static} name
+    numRooms
+    posterSize
+    categories
+}
+
+Event "1" -- "0..*" Location: has
+Location "0..1" -- "0..1" User: occupied by

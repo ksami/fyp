@@ -1,0 +1,40 @@
+title Sequence Diagram for ViewEvent
+
+participant Database as D
+participant Server as S
+participant Client as C
+
+C -> S: Sync
+
+activate S
+
+S -> C: Acknowledge
+S -> D: Query database
+
+activate D
+D -> S: Results
+deactivate D
+
+S -> C: Event information
+
+
+activate C
+C -> C: Initialize three.js
+
+activate C
+C -> C: Render
+
+loop until disconnect
+    C -> C: Keyboard input
+    C <-> S: Position data
+    C <-> S: Text chat
+    C <-> S: Audio/video streaming
+end
+
+deactivate C
+
+...
+
+
+C -> S: Disconnect
+deactivate C

@@ -1,0 +1,35 @@
+title System Architecture
+
+database "Database" {
+    [MongoDB]
+}
+
+
+package "Node.JS Server" {
+    frame "KeystoneJS" {
+        [Express]
+        [Mongoose]
+        [Jade]
+        [Controller]
+    }
+    [Mongoose] <..> [MongoDB]
+    [Mongoose] <.up.> [Controller]
+    [Express] -up- HTTP
+    [Jade] -> [Express]: HTML
+    [Controller] --> [Jade]: variables
+    [Controller] <..> [Express]
+    [Socket.IO] <..> [Controller]
+    [Socket.IO] -up- Websockets
+}
+
+package "Client" {
+    [Socket.IO Client] <..> Websockets: real-time communication
+    [Browser] <..> HTTP
+    [Browser] <..> [Socket.IO Client]: streaming data
+    [Socket.IO Client] ..> [three.js]
+    [three.js] <.> [Browser]
+}
+
+cloud "Cloudinary" {
+    [Images] <..> HTTP
+}

@@ -4,3 +4,5 @@ data
 bower_components
 .env
 diff
+*.doc
+*.docx
