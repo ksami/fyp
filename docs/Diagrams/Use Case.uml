@@ -1,0 +1,29 @@
+title Use Case
+
+actor Organizer as Org
+participant System as Sys
+actor Participant as Part
+
+Org -> Sys: Create Event
+
+activate Sys
+
+Sys -> Sys: Create User Accounts
+
+activate Sys
+deactivate Sys
+
+Sys -> Part: Email Account Details
+
+deactivate Sys
+
+...
+
+Part -> Sys: Login with Account Details
+
+activate Sys
+
+Part -> Sys: Upload Poster
+Part -> Sys: Submit Profile Information
+
+deactivate Sys
