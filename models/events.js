@@ -5,10 +5,8 @@ var Event = new keystone.List('Event');
  
 Event.add({
     name: { type: String, required: true },
-    numRooms: { type: Types.Number, required: true, default: "4" },
-    participants: { type: Types.Relationship, ref: 'User', many: true },
-    categories: { type: String, many: true },
-    posterSize: { type: String }
+    numRooms: { type: Types.Number, required: true, default: '4' },
+    rooms: { type: Types.Relationship, ref: 'Room', many: true }
 });
  
 Event.register();

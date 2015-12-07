@@ -2,5 +2,7 @@
 // Includes models //
 /////////////////////
 
-require('./users.js');
 require('./events.js');
+require('./rooms.js');
+require('./booths.js');
+require('./users.js');

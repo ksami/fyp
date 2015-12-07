@@ -15,9 +15,9 @@ User.add({
     isAdmin: { type: Boolean, default: false, label: 'Admin' },
     isOrganiser: { type: Boolean, default: false, label: 'Organiser' },
     isParticipant: { type: Boolean, default: false, label: 'Participants' },
-    isPublic: { type: Boolean, default: true, label: 'Public' }
+    isPublic: { type: Boolean, default: true, label: 'Public' },
 });
 
-User.relationship({ path: 'events', ref: 'Event', refPath: 'participants' });
+User.relationship({ path: 'booths', ref: 'Booth', refPath: 'user' });
 
 User.register();
