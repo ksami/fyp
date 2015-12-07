@@ -11,10 +11,14 @@ object User {
     name
 }
 
-object Location {
+object Booth {
+    {static} id
+    poster
+}
+
+object Room {
     {static} id
     category
-    poster
 }
 
 object Event {
@@ -24,5 +28,6 @@ object Event {
     categories
 }
 
-Event "1" -- "0..*" Location: has
-Location "0..1" -- "0..1" User: occupied by
+Event "1" -- "1..*" Room: has
+Room "1" -- "10" Booth: has
+Booth "0..1" -- "0..1" User: occupied by
