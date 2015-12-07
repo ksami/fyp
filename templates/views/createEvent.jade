@@ -9,6 +9,8 @@ block intro
 block content
     .row
         if isCreated == false
+            if errMsg
+                h4= errMsg
             h3 Event Details
             form(name='event-details', method='post')
                 input(type='hidden', name='action', value='create-event')
