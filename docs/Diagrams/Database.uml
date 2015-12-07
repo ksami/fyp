@@ -18,7 +18,7 @@ object Booth {
 
 object Room {
     {static} id
-    category
+    {static} category
 }
 
 object Event {
