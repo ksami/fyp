@@ -5,9 +5,9 @@
 require('dotenv').load();
 var socketio = require('socket.io');
 var keystone = require('keystone');
-var debugsocket = require('debug')('socket');
-var debugdb = require('debug')('db');
-var debug = require('debug')('info');
+var debugsocket = require('debug')('vPoster:socket');
+var debugdb = require('debug')('vPoster:db');
+var debug = require('debug')('vPoster:info');
 
 keystone.init({
 
@@ -72,30 +72,6 @@ keystone.start({
             session(socket.handshake, {}, next);
         });
 
-
-        function queryEventDetails(socket, eventid){
-            //find details of Event by querying db
-            var Event = keystone.list('Event');
-            Event.model.findOne()
-                .where('name').equals(eventid)
-                .exec(function(err, event){
-                    if(err){
-                        debugdb('+++ db error')
-                        debugdb(err);
-                    }
-                    else{
-                        if(event === null){
-                            debugdb('+++ no results');
-                        }
-                        else{
-                            debugdb('+++ data found');
-                            debugdb(event);
-                            socket.emit('eventDetails', event);
-                        }
-                    }
-                });
-        }
-        
         io.on('connect', function(socket){
             debugsocket('--- ' + socket.id + ' connected');
             socket.emit('syn');
@@ -103,9 +79,15 @@ keystone.start({
             // session.eventid set in route controller for event
             socket.on('ack', function(){
                 socket.emit('syn-ack');
-                queryEventDetails(socket, socket.handshake.session.eventid);
+                // monitor the variable until db query sets it
+                var monitor = setInterval(function(){
+                    if(typeof socket.handshake.session.eventDetails !== 'undefined'){
+                        clearInterval(monitor);
+                        socket.emit('eventDetails', socket.handshake.session.eventDetails);
+                        delete socket.handshake.session.eventDetails;
+                    }
+                }, 1000);
             });
-            debugsocket(socket.handshake.session);
 
             socket.on('disconnect', function(){
                 debugsocket('--- ' + socket.id + ' disconnected');
