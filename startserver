@@ -1,0 +1,12 @@
+#!/bin/bash
+
+export NODE_ENV=development
+export DEBUG=vPoster:*
+
+echo "=== Starting DB ==="
+mongod --dbpath data > /dev/null &
+echo "=== DB started, starting server ==="
+node server.js
+echo "=== Server killed ==="
+pkill mongod
+echo "=== DB killed ==="

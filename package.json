@@ -15,6 +15,6 @@
     "npm": "^2.14.4"
   },
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "./startserver"
   }
 }
