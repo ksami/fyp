@@ -88,11 +88,11 @@ function init(){
     // Rooms
     for(let i=0; i<NUM_ROOMS/2; i++){
         //create 2 rows with corridor in between
-        let room = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+        let room = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i].booths.length});
         scene.add(room);
         collidableMeshList = collidableMeshList.concat(getMeshes(room));
 
-        let room2 = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM);
+        let room2 = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length});
         scene.add(room2);
         collidableMeshList = collidableMeshList.concat(getMeshes(room2));
     }
@@ -107,7 +107,7 @@ function init(){
     scene.add(floor);
 
     // Hall Walls
-    let hall = createRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL, {light: false});
+    let hall = createRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL, {hasLight: false, hasBooths: false});
     scene.add(hall);
     collidableMeshList = collidableMeshList.concat(getMeshes(hall));
 
@@ -245,12 +245,18 @@ function getMeshes(obj){
  * @param  {number} height - Height of the room in the y-axis
  * @param  {number} breadth - Breadth of the walls in the z-axis
  * @param {Object=} opts - Options for creating the room
+ * @param {integer} [opts.numBooths=0] - Number of booths in the room that will be visible
+ * @param {boolean} [opts.hasBooths=true] - If true, creates 10 booths
  * @param {boolean} [opts.hasLight=true] - If true, creates a main light in the center of the room
  * @param {boolean} [opts.hasDoor=false] - If true, creates a door for the room
  * @return  {THREE.Object3D} room - Dummy room object to group walls and light
  */
 function createRoom(corner, length, height, breadth, opts){
-    opts = opts || {light: true, door: false};
+    opts = opts || {};
+    opts.numBooths = opts.numBooths || 0;
+    opts.hasBooths = typeof opts.hasBooths === 'undefined' ? true : opts.hasBooths;
+    opts.hasLight = typeof opts.hasLight === 'undefined' ? true : opts.hasLight;
+    opts.hasDoor = typeof opts.hasDoor === 'undefined' ? false : opts.hasDoor;
 
     //TODO: leave space for door!
     let x = corner.x;
@@ -260,7 +266,7 @@ function createRoom(corner, length, height, breadth, opts){
 
     let room = new THREE.Object3D();
 
-    if(opts.hasOwnProperty('light') && opts['light']){
+    if(opts.hasLight){
         // Light in the centre of the room
         let pointLight = new THREE.PointLight(0x999999, 5, length/4*3);
         pointLight.position.set(x+length/2,y+20,z+breadth/2);
@@ -270,7 +276,7 @@ function createRoom(corner, length, height, breadth, opts){
 
     let wallLengthGeometry = new THREE.PlaneBufferGeometry(length, height);
     let wallBreadthGeometry = new THREE.PlaneBufferGeometry(breadth, height);
-    let wallMaterial = new THREE.MeshPhongMaterial({color: 0x9999999, side: THREE.DoubleSide});
+    let wallMaterial = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
     let wallLength1 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
     let wallLength2 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
     let wallBreadth1 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
@@ -291,6 +297,19 @@ function createRoom(corner, length, height, breadth, opts){
     room.add(wallBreadth1);
     room.add(wallBreadth2);
 
+    if(!opts.hasBooths){
+        return room;
+    }
+
+    //booths
+    let numBooths = 10;
+    for(let i=0; i<numBooths; i++){
+        let boothGeometry = new THREE.PlaneBufferGeometry((length/numBooths)-2, height-3);
+        let boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
+        let booth = new THREE.Mesh(boothGeometry, boothMaterial);
+        booth.position.set(x+(i*length/numBooths), y+height/2, z+0.1);
+        room.add(booth);
+    }
 
     return room;
 }
