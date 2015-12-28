@@ -6,7 +6,7 @@ export DEBUG=vPoster:*
 echo "=== Starting DB ==="
 mongod --dbpath data > /dev/null &
 echo "=== DB started, starting server ==="
-node server.js
+nodemon server.js
 echo "=== Server killed ==="
 pkill mongod
 echo "=== DB killed ==="

@@ -9,6 +9,7 @@ var keystone = require('keystone'),
     User = keystone.list('User'),
     crypto = require('crypto'),
     _ = require('underscore'),
+    debugdb = require('debug')('vPoster:db'),
     emailServer = require('emailjs/email').server.connect({
        user:    process.env.SERVER_EMAIL_ADD,
        password:process.env.SERVER_EMAIL_PW,
@@ -130,6 +131,7 @@ exports = module.exports = function(req, res) {
                     poster: '',
                     user: user._id
                 });
+                debugdb(`booth: ${booth} \nuser: ${user}`);
 
                 booths.push(booth);
 

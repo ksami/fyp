@@ -29,6 +29,16 @@ exports = module.exports = function(req, res) {
         var Event = keystone.list('Event');
         Event.model.findOne()
         .where('name').equals(eventid)
+        .populate({
+            path: 'rooms',
+            populate: {
+                path: 'booths',
+                populate: {
+                    path: 'user',
+                    select: 'name'
+                }
+            }
+        })
         .exec()
         .then(function(event){
             if(event === null){

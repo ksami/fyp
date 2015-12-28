@@ -19,6 +19,7 @@ var HEIGHT_CORRIDOR = 10;
 /////////////
 // Globals //
 /////////////
+var _event;
 var container, scene, camera, renderer, controls;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
@@ -310,6 +311,7 @@ socket.on('disconnect', function(){
 });
 
 socket.on('eventDetails', function(event){
+    _event = event;
     console.log('+++ eventDetails received');
     console.log(event);
 
