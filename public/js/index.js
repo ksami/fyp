@@ -92,7 +92,7 @@ function init(){
         scene.add(room);
         collidableMeshList = collidableMeshList.concat(getMeshes(room));
 
-        let room2 = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length});
+        let room2 = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length, isMirror: true});
         scene.add(room2);
         collidableMeshList = collidableMeshList.concat(getMeshes(room2));
     }
@@ -249,6 +249,7 @@ function getMeshes(obj){
  * @param {boolean} [opts.hasBooths=true] - If true, creates 10 booths
  * @param {boolean} [opts.hasLight=true] - If true, creates a main light in the center of the room
  * @param {boolean} [opts.hasDoor=false] - If true, creates a door for the room
+ * @param {boolean} [opts.isMirror=false] If true, rotates room by PI
  * @return  {THREE.Object3D} room - Dummy room object to group walls and light
  */
 function createRoom(corner, length, height, breadth, opts){
@@ -257,14 +258,15 @@ function createRoom(corner, length, height, breadth, opts){
     opts.hasBooths = typeof opts.hasBooths === 'undefined' ? true : opts.hasBooths;
     opts.hasLight = typeof opts.hasLight === 'undefined' ? true : opts.hasLight;
     opts.hasDoor = typeof opts.hasDoor === 'undefined' ? false : opts.hasDoor;
+    opts.isMirror = typeof opts.isMirror === 'undefined' ? false : opts.isMirror;
 
     //TODO: leave space for door!
-    let x = corner.x;
-    let y = corner.y;
-    let z = corner.z;
+    var x = corner.x;
+    var y = corner.y;
+    var z = corner.z;
 
 
-    let room = new THREE.Object3D();
+    var room = new THREE.Object3D();
 
     if(opts.hasLight){
         // Light in the centre of the room
@@ -273,43 +275,77 @@ function createRoom(corner, length, height, breadth, opts){
         room.add(pointLight);
     }
 
+    var wallLengthGeometry = new THREE.PlaneBufferGeometry(length, height);
+    var wallBreadthGeometry = new THREE.PlaneBufferGeometry(breadth, height);
 
-    let wallLengthGeometry = new THREE.PlaneBufferGeometry(length, height);
-    let wallBreadthGeometry = new THREE.PlaneBufferGeometry(breadth, height);
-    let wallMaterial = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
-    let wallLength1 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
-    let wallLength2 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
-    let wallBreadth1 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
-    let wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
+    var wallMaterial = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
+
+    var wallLength1 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
+    var wallLength2 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
+    var wallBreadth1 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
+    var wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
+
+    // Booths
+    //TODO: render booths along the 3 sides
+    if(opts.hasBooths){
+        var margin = 4;
+        var boothGeometry = new THREE.PlaneBufferGeometry(9, height-3);
+        var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
+        var boothMaterialb = new THREE.MeshPhongMaterial({color: 0x00ff00, side: THREE.DoubleSide});
+        
+        for(let i=0; i<4; i++){
+            let booth = new THREE.Mesh(boothGeometry, boothMaterial);
+            booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
+            wallLength1.add(booth);
+        }
+
+        // wall with door
+        let booth8 = new THREE.Mesh(boothGeometry, boothMaterial);
+        let booth9 = new THREE.Mesh(boothGeometry, boothMaterial);
+        booth8.position.set(((0*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
+        booth9.position.set(((3*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
+        wallLength2.add(booth8);
+        wallLength2.add(booth9);
+
+        for(let i=0; i<2; i++){
+            let booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+            booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
+            wallBreadth1.add(booth);
+        }
+
+        for(let i=0; i<2; i++){
+            let booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+            booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
+            wallBreadth2.add(booth);
+        }
+    }
 
     //set corner at (0,0,0)
-    wallLength1.position.set(x+length/2, y+height/2, z);
-    wallLength2.position.set(x+length/2, y+height/2, z+breadth);
     wallBreadth1.position.set(x, y+height/2, z+breadth/2);
     wallBreadth2.position.set(x+length, y+height/2, z+breadth/2);
 
+    //mirror room on other side of corridor
+    if(opts.isMirror){
+        wallLength1.position.set(x+length/2, y+height/2, z+breadth);
+        wallLength2.position.set(x+length/2, y+height/2, z);
+        wallLength1.rotation.y = Math.PI;
+    }
+    else{
+        wallLength1.position.set(x+length/2, y+height/2, z);
+        wallLength2.position.set(x+length/2, y+height/2, z+breadth);
+        wallLength2.rotation.y = Math.PI;
+    }
+
+
     //rotate about own origin
     wallBreadth1.rotation.y = Math.PI/2;
-    wallBreadth2.rotation.y = Math.PI/2;
+    wallBreadth2.rotation.y = -Math.PI/2;
 
     room.add(wallLength1);
     room.add(wallLength2);
     room.add(wallBreadth1);
     room.add(wallBreadth2);
 
-    if(!opts.hasBooths){
-        return room;
-    }
-
-    //booths
-    let numBooths = 10;
-    for(let i=0; i<numBooths; i++){
-        let boothGeometry = new THREE.PlaneBufferGeometry((length/numBooths)-2, height-3);
-        let boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
-        let booth = new THREE.Mesh(boothGeometry, boothMaterial);
-        booth.position.set(x+(i*length/numBooths), y+height/2, z+0.1);
-        room.add(booth);
-    }
 
     return room;
 }
