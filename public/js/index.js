@@ -1,3 +1,5 @@
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
 ///////////////
 // Constants //
 ///////////////
@@ -36,6 +38,7 @@ function init(){
 
     //debug: Axis
     let axisHelper = new THREE.AxisHelper(3);
+    axisHelper.position.set(12,1,12);
     scene.add(axisHelper);
 
 
@@ -60,29 +63,47 @@ function init(){
     container.appendChild(renderer.domElement);
 
 
-    //debug: Mouse Look
-    controls = new THREE.OrbitControls(camera);
-    controls.damping = 0.2;
-    controls.addEventListener('change', render);
-
-
     // Lights
     let ambientLight = new THREE.AmbientLight(0xa0a0a0);
     scene.add(ambientLight);
 
 
     // Person
-    let cubeGeometry = new THREE.BoxGeometry(2,1,1);
+    let cubeGeometry = new THREE.BoxGeometry(1,2,1);
     let cubeMaterial = new THREE.MeshPhongMaterial();
     cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    cube.position.set(12,1,12);
-    cube.rotation.y = Math.PI/2;
-    scene.add(cube);
+    // cube.position.set(12,1,12);
+    // cube.rotation.y = Math.PI/2;
+    // scene.add(cube);
+    // cube.position.set(0,-2,2);  // relative to camera
 
-    camera.position.y = 5;
-    camera.position.z = -5;
-    camera.lookAt(new THREE.Vector3(0,0,4));
-    cube.add(camera);
+    // camera.position.set(0,2,-1);  // relative to cube
+    // camera.lookAt(new THREE.Vector3(12,2,13));  // look in z direction
+    // cube.add(camera);
+    // camera.position.set(12,3,12);
+    let person = new THREE.Object3D();
+    person.position.set(12,1,12);
+    cube.position.set(0,0,0);
+    camera.position.set(3,3,3);
+    person.add(cube);
+    person.add(camera);
+    scene.add(person);
+
+
+    //debug: Free Look
+    // controls = new THREE.OrbitControls(camera);
+    // controls.damping = 0.2;
+    // controls.addEventListener('change', render);
+    // FPS Look
+    controls = new THREE.FirstPersonControls(person);
+    controls.movementSpeed = 2;
+    controls.lookSpeed = 0.04;
+    controls.lookVertical = true;
+    controls.constrainVertical = true;
+    controls.verticalMin = 1.3;
+    controls.verticalMax = 1.7;
+    controls.noFly = true;
+    controls.noFlyYLock = 1;
 
 
     // Rooms
@@ -135,8 +156,6 @@ function run(){
     requestAnimationFrame(run);
     update();
     render();
-    //debug:
-    controls.update();
 }
 
 /**
@@ -153,32 +172,35 @@ function update(){
 
     // delta = change in time since last call (seconds)
     let delta = clock.getDelta(); 
-    let moveDistance = SPEED_MOVE * delta;
-    let turnArc = SPEED_TURN * delta;
+    // let moveDistance = SPEED_MOVE * delta;
+    // let turnArc = SPEED_TURN * delta;
 
     let collisionResult = detectCollision(cube, collidableMeshList);
    
-    // move forwards/backwards
-    if(keyboard.pressed('w')){
-        cube.translateZ(moveDistance);
-        if(collisionResult.isCollided && collisionResult.sideToBlock === 'front'){
-            cube.translateZ(-moveDistance);
-        }
-    }
-    if(keyboard.pressed('s')){
-        cube.translateZ(-moveDistance);
-        if(collisionResult.isCollided && collisionResult.sideToBlock === 'back'){
-            cube.translateZ(moveDistance);
-        }
-    }
+    // update mouse controls
+    controls.update(delta);
 
-    // rotate left/right
-    if(keyboard.pressed('a')){
-        cube.rotation.y += turnArc;
-    }
-    if(keyboard.pressed('d')){
-        cube.rotation.y -= turnArc;
-    }
+    // // move forwards/backwards
+    // if(keyboard.pressed('w')){
+    //     cube.translateZ(moveDistance);
+    //     if(collisionResult.isCollided && collisionResult.sideToBlock === 'front'){
+    //         cube.translateZ(-moveDistance);
+    //     }
+    // }
+    // if(keyboard.pressed('s')){
+    //     cube.translateZ(-moveDistance);
+    //     if(collisionResult.isCollided && collisionResult.sideToBlock === 'back'){
+    //         cube.translateZ(moveDistance);
+    //     }
+    // }
+
+    // // rotate left/right
+    // if(keyboard.pressed('a')){
+    //     cube.rotation.y += turnArc;
+    // }
+    // if(keyboard.pressed('d')){
+    //     cube.rotation.y -= turnArc;
+    // }
     
 }
 
@@ -289,8 +311,11 @@ function createRoom(corner, length, height, breadth, opts){
     //TODO: render booths along the 3 sides
     if(opts.hasBooths){
         var margin = 4;
+        var poster = THREE.ImageUtils.loadTexture('../images/a4poster.png');
+        poster.mapS = poster.mapT = THREE.RepeatWrapping;
         var boothGeometry = new THREE.PlaneBufferGeometry(9, height-3);
-        var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
+        var boothMaterial = new THREE.MeshBasicMaterial({map: poster});
+        // var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
         var boothMaterialb = new THREE.MeshPhongMaterial({color: 0x00ff00, side: THREE.DoubleSide});
         
         for(let i=0; i<4; i++){
