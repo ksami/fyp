@@ -33,119 +33,7 @@ var cube;
 // Setup //
 ///////////
 function init(){
-    // Scene
-    scene = new THREE.Scene();
-
-    //debug: Axis
-    let axisHelper = new THREE.AxisHelper(3);
-    axisHelper.position.set(12,1,12);
-    scene.add(axisHelper);
-
-
-    // Camera
-    //args: fov, aspect ratio, near, far
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-
-
-    // Renderer
-    if (Detector.webgl){
-        renderer = new THREE.WebGLRenderer({antialias:true});
-    }
-    else{
-        renderer = new THREE.CanvasRenderer(); 
-    }
-
-    //note: window.innerWidth/2 and window.innerHeight/2 will give half resolution
-    //useful for performance intensive
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    container = document.getElementById('threejs');
-    container.appendChild(renderer.domElement);
-
-
-    // Lights
-    let ambientLight = new THREE.AmbientLight(0xa0a0a0);
-    scene.add(ambientLight);
-
-
-    // Person
-    let cubeGeometry = new THREE.BoxGeometry(1,2,1);
-    let cubeMaterial = new THREE.MeshPhongMaterial();
-    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    // cube.position.set(12,1,12);
-    // cube.rotation.y = Math.PI/2;
-    // scene.add(cube);
-    // cube.position.set(0,-2,2);  // relative to camera
-
-    // camera.position.set(0,2,-1);  // relative to cube
-    // camera.lookAt(new THREE.Vector3(12,2,13));  // look in z direction
-    // cube.add(camera);
-    // camera.position.set(12,3,12);
-    let person = new THREE.Object3D();
-    person.position.set(12,1,12);
-    cube.position.set(0,0,0);
-    camera.position.set(3,3,3);
-    person.add(cube);
-    person.add(camera);
-    scene.add(person);
-
-
-    //debug: Free Look
-    // controls = new THREE.OrbitControls(camera);
-    // controls.damping = 0.2;
-    // controls.addEventListener('change', render);
-    // FPS Look
-    controls = new THREE.FirstPersonControls(person);
-    controls.movementSpeed = 2;
-    controls.lookSpeed = 0.04;
-    controls.lookVertical = true;
-    controls.constrainVertical = true;
-    controls.verticalMin = 1.3;
-    controls.verticalMax = 1.7;
-    controls.noFly = true;
-    controls.noFlyYLock = 1;
-
-
-    // Rooms
-    for(let i=0; i<NUM_ROOMS/2; i++){
-        //create 2 rows with corridor in between
-        let room = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i].booths.length});
-        scene.add(room);
-        collidableMeshList = collidableMeshList.concat(getMeshes(room));
-
-        let room2 = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length, isMirror: true});
-        scene.add(room2);
-        collidableMeshList = collidableMeshList.concat(getMeshes(room2));
-    }
-
-
-    // Hall Floor
-    let floorGeometry = new THREE.PlaneBufferGeometry(LENGTH_HALL, BREADTH_HALL);
-    let floorMaterial = new THREE.MeshBasicMaterial({color: 0x444444});
-    let floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.position.set(LENGTH_HALL/2, 0, BREADTH_HALL/2);
-    floor.rotation.x = -Math.PI/2;
-    scene.add(floor);
-
-    // Hall Walls
-    let hall = createRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL, {hasLight: false, hasBooths: false});
-    scene.add(hall);
-    collidableMeshList = collidableMeshList.concat(getMeshes(hall));
-
-
-    // Skybox
-    let skyBoxGeometry = new THREE.BoxGeometry(3000, 1000, 1000);
-    let skyBoxMaterial = new THREE.MeshBasicMaterial({color: 0x9999ff, side: THREE.BackSide});
-    let skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
-    scene.add(skyBox);
-
-    // Load model
-    // var jsonLoader = new THREE.JSONLoader();
-    // jsonLoader.load('models/room.json', function(geometry, materials){
-    //     var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-    //     scene.add(mesh);
-    //     collidableMeshList.push(mesh);
-    // });
+    setupScene();
 }
 
 
@@ -171,11 +59,11 @@ function render(){
 function update(){
 
     // delta = change in time since last call (seconds)
-    let delta = clock.getDelta(); 
-    // let moveDistance = SPEED_MOVE * delta;
-    // let turnArc = SPEED_TURN * delta;
+    var delta = clock.getDelta(); 
+    // var moveDistance = SPEED_MOVE * delta;
+    // var turnArc = SPEED_TURN * delta;
 
-    let collisionResult = detectCollision(cube, collidableMeshList);
+    var collisionResult = detectCollision(cube, collidableMeshList);
    
     // update mouse controls
     controls.update(delta);
@@ -219,16 +107,16 @@ function detectCollision(msh, collidableMeshList){
     //   for increased collision accuracy, add more vertices to the cube;
     //      for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
     //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
-    let originPoint = msh.position.clone();
+    var originPoint = msh.position.clone();
     //todo: use bounding box of msh
     
-    for (let vertexIndex = 0; vertexIndex < msh.geometry.vertices.length; vertexIndex++){       
-        let localVertex = msh.geometry.vertices[vertexIndex].clone();
-        let globalVertex = localVertex.applyMatrix4(msh.matrix);
-        let directionVector = globalVertex.sub(msh.position);
+    for (var vertexIndex = 0; vertexIndex < msh.geometry.vertices.length; vertexIndex++){       
+        var localVertex = msh.geometry.vertices[vertexIndex].clone();
+        var globalVertex = localVertex.applyMatrix4(msh.matrix);
+        var directionVector = globalVertex.sub(msh.position);
         
-        let ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-        let collisionResults = ray.intersectObjects(collidableMeshList);
+        var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+        var collisionResults = ray.intersectObjects(collidableMeshList);
 
         if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
             //collision for this ray from
@@ -250,7 +138,7 @@ function detectCollision(msh, collidableMeshList){
  * @return {THREE.Mesh[]} arr - Array of child meshes
  */
 function getMeshes(obj){
-    let arr = [];
+    var arr = [];
     obj.traverse(function(node){
         if(node instanceof THREE.Mesh){
             arr.push(node);
@@ -292,7 +180,7 @@ function createRoom(corner, length, height, breadth, opts){
 
     if(opts.hasLight){
         // Light in the centre of the room
-        let pointLight = new THREE.PointLight(0x999999, 5, length/4*3);
+        var pointLight = new THREE.PointLight(0x999999, 5, length/4*3);
         pointLight.position.set(x+length/2,y+20,z+breadth/2);
         room.add(pointLight);
     }
@@ -318,28 +206,28 @@ function createRoom(corner, length, height, breadth, opts){
         // var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
         var boothMaterialb = new THREE.MeshPhongMaterial({color: 0x00ff00, side: THREE.DoubleSide});
         
-        for(let i=0; i<4; i++){
-            let booth = new THREE.Mesh(boothGeometry, boothMaterial);
+        for(var i=0; i<4; i++){
+            var booth = new THREE.Mesh(boothGeometry, boothMaterial);
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
 
         // wall with door
-        let booth8 = new THREE.Mesh(boothGeometry, boothMaterial);
-        let booth9 = new THREE.Mesh(boothGeometry, boothMaterial);
+        var booth8 = new THREE.Mesh(boothGeometry, boothMaterial);
+        var booth9 = new THREE.Mesh(boothGeometry, boothMaterial);
         booth8.position.set(((0*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
         booth9.position.set(((3*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
         wallLength2.add(booth8);
         wallLength2.add(booth9);
 
-        for(let i=0; i<2; i++){
-            let booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+        for(var i=0; i<2; i++){
+            var booth = new THREE.Mesh(boothGeometry, boothMaterialb);
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth1.add(booth);
         }
 
-        for(let i=0; i<2; i++){
-            let booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+        for(var i=0; i<2; i++){
+            var booth = new THREE.Mesh(boothGeometry, boothMaterialb);
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth2.add(booth);
         }
@@ -376,6 +264,123 @@ function createRoom(corner, length, height, breadth, opts){
 }
 
 
+function setupScene(){
+    // Scene
+    scene = new THREE.Scene();
+
+    //debug: Axis
+    var axisHelper = new THREE.AxisHelper(3);
+    axisHelper.position.set(12,1,12);
+    scene.add(axisHelper);
+
+
+    // Camera
+    //args: fov, aspect ratio, near, far
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+
+
+    // Renderer
+    if (Detector.webgl){
+        renderer = new THREE.WebGLRenderer({antialias:true});
+    }
+    else{
+        renderer = new THREE.CanvasRenderer(); 
+    }
+
+    //note: window.innerWidth/2 and window.innerHeight/2 will give half resolution
+    //useful for performance intensive
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    container = document.getElementById('threejs');
+    container.appendChild(renderer.domElement);
+
+
+    // Lights
+    var ambientLight = new THREE.AmbientLight(0xa0a0a0);
+    scene.add(ambientLight);
+
+
+    // Person
+    var cubeGeometry = new THREE.BoxGeometry(1,2,1);
+    var cubeMaterial = new THREE.MeshPhongMaterial();
+    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    // cube.position.set(12,1,12);
+    // cube.rotation.y = Math.PI/2;
+    // scene.add(cube);
+    // cube.position.set(0,-2,2);  // relative to camera
+
+    // camera.position.set(0,2,-1);  // relative to cube
+    // camera.lookAt(new THREE.Vector3(12,2,13));  // look in z direction
+    // cube.add(camera);
+    // camera.position.set(12,3,12);
+    var person = new THREE.Object3D();
+    person.position.set(12,1,12);
+    cube.position.set(0,0,0);
+    camera.position.set(3,3,3);
+    person.add(cube);
+    person.add(camera);
+    scene.add(person);
+
+
+    //debug: Free Look
+    // controls = new THREE.OrbitControls(camera);
+    // controls.damping = 0.2;
+    // controls.addEventListener('change', render);
+    // FPS Look
+    controls = new THREE.FirstPersonControls(person);
+    controls.movementSpeed = 2;
+    controls.lookSpeed = 0.04;
+    controls.lookVertical = true;
+    controls.constrainVertical = true;
+    controls.verticalMin = 1.3;
+    controls.verticalMax = 1.7;
+    controls.noFly = true;
+    controls.noFlyYLock = 1;
+
+
+    // Rooms
+    for(var i=0; i<NUM_ROOMS/2; i++){
+        //create 2 rows with corridor in between
+        var room = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i].booths.length});
+        scene.add(room);
+        collidableMeshList = collidableMeshList.concat(getMeshes(room));
+
+        var room2 = createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length, isMirror: true});
+        scene.add(room2);
+        collidableMeshList = collidableMeshList.concat(getMeshes(room2));
+    }
+
+
+    // Hall Floor
+    var floorGeometry = new THREE.PlaneBufferGeometry(LENGTH_HALL, BREADTH_HALL);
+    var floorMaterial = new THREE.MeshBasicMaterial({color: 0x444444});
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.set(LENGTH_HALL/2, 0, BREADTH_HALL/2);
+    floor.rotation.x = -Math.PI/2;
+    scene.add(floor);
+
+    // Hall Walls
+    var hall = createRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL, {hasLight: false, hasBooths: false});
+    scene.add(hall);
+    collidableMeshList = collidableMeshList.concat(getMeshes(hall));
+
+
+    // Skybox
+    var skyBoxGeometry = new THREE.BoxGeometry(3000, 1000, 1000);
+    var skyBoxMaterial = new THREE.MeshBasicMaterial({color: 0x9999ff, side: THREE.BackSide});
+    var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
+    scene.add(skyBox);
+
+    // Load model
+    // var jsonLoader = new THREE.JSONLoader();
+    // jsonLoader.load('models/room.json', function(geometry, materials){
+    //     var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    //     scene.add(mesh);
+    //     collidableMeshList.push(mesh);
+    // });
+}
+
+
 //////////////
 // Socketio //
 //////////////
@@ -399,7 +404,7 @@ socket.on('eventDetails', function(event){
     document.getElementById('loading').innerHTML = '';
 
     // constrain number of rooms to even number
-    let num = parseInt(event.numRooms);
+    var num = parseInt(event.numRooms);
     NUM_ROOMS = (num%2) ? num+1 : num;
     LENGTH_HALL = LENGTH_ROOM * (NUM_ROOMS / 2);
     BREADTH_HALL = (BREADTH_ROOM * 2) + BREADTH_CORRIDOR;
