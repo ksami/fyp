@@ -15,6 +15,7 @@
     "npm": "^2.14.4"
   },
   "scripts": {
-    "start": "sh ./startdb && sh ./startserver"
+    "build": "browserify ./public/js/index.js -o ./public/js/bundle.js",
+    "start": "sh ./startserver"
   }
 }

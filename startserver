@@ -3,6 +3,8 @@
 export NODE_ENV=development
 export DEBUG=vPoster:*
 
+echo "=== Building scripts ==="
+npm run-script build
 echo "=== Starting DB ==="
 mongod --dbpath data > /dev/null &
 echo "=== DB started, starting server ==="
