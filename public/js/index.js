@@ -31,7 +31,7 @@ var _persons = [];  // all person/user ids in scene except self
 var container, scene, camera, renderer, controls;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
-var collidableMeshList = [];
+var _collidableMeshList = [];
 var cube;
 var person;
 
@@ -70,10 +70,14 @@ function update(){
   // var moveDistance = SPEED_MOVE * delta;
   // var turnArc = SPEED_TURN * delta;
 
-  var collisionResult = Utils.detectCollision(person.getObjectByName('body'), collidableMeshList);
-   
-  // update mouse controls
-  controls.update(delta);
+  var collisionResult = Utils.detectCollision(person, _collidableMeshList);
+  // console.log(collisionResult);
+  // var collisionResult = {isCollided: true, sideToBlock: 'front'};
+  if(collisionResult.isCollided){
+    console.log(collisionResult);
+  }
+  // update controls
+  controls.update(delta, collisionResult);
 
   // // move forwards/backwards
   // if(keyboard.pressed('w')){
@@ -140,9 +144,10 @@ function setupScene(){
   // Person
   person = new Person(_user.id);
   person.position.set(12,1,12);
-  camera.position.set(3,3,3);
+  camera.position.set(2,3,4);
   person.add(camera);
   scene.add(person);
+
 
 
   //debug: Free Look
@@ -166,11 +171,11 @@ function setupScene(){
     //create 2 rows with corridor in between
     var room = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i].booths.length});
     scene.add(room);
-    collidableMeshList = collidableMeshList.concat(Utils.getMeshes(room));
+    _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(room));
 
     var room2 = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length, isMirror: true});
     scene.add(room2);
-    collidableMeshList = collidableMeshList.concat(Utils.getMeshes(room2));
+    _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(room2));
   }
 
 
@@ -185,7 +190,7 @@ function setupScene(){
   // Hall Walls
   var hall = Utils.createRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL, {hasLight: false, hasBooths: false});
   scene.add(hall);
-  collidableMeshList = collidableMeshList.concat(Utils.getMeshes(hall));
+  _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(hall));
 
 
   // Skybox
@@ -199,7 +204,7 @@ function setupScene(){
   // jsonLoader.load('models/room.json', function(geometry, materials){
   //   var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
   //   scene.add(mesh);
-  //   collidableMeshList.push(mesh);
+  //   _collidableMeshList.push(mesh);
   // });
 }
 
@@ -247,6 +252,7 @@ socket.on('scene-state-change', function(update){
       var newperson = new Person(update.person.user.id);
       newperson.position.copy(update.person.position);
       newperson.rotation.copy(update.person.rotation);
+      newperson.getObjectByName('body').add(new THREE.AxisHelper(4));
       scene.add(newperson);
       _persons.push(update.person.user.id);
     }
@@ -254,7 +260,6 @@ socket.on('scene-state-change', function(update){
       var updateperson = scene.getObjectByName(update.person.user.id);
       updateperson.position.copy(update.person.position);
       updateperson.rotation.copy(update.person.rotation);
-      // updateperson.quaternion.copy(update.person.quaternion);
     }
   }
 });
@@ -268,4 +273,4 @@ var intervalUpdate = setInterval(function(){
       rotation: person.rotation
     });
   }
-}, 500);
+}, 100);

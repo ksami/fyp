@@ -2,12 +2,12 @@
  * @author mrdoob / http://mrdoob.com/
  * @author alteredq / http://alteredqualia.com/
  * @author paulirish / http://paulirish.com/
- * @author edited by ksami - add noFly and noFlyYLock / http://ksami.github.io/
+ * @author edited by ksami - add noFly, noFlyYLock, collision to update / http://ksami.github.io/
  */
 
-THREE.FirstPersonControls = function ( camera, domElement ) {
+THREE.FirstPersonControls = function ( object, domElement ) {
 
-  this.camera = camera;
+  this.object = object;
   this.target = new THREE.Vector3( 0, 0, 0 );
 
   this.domElement = ( domElement !== undefined ) ? domElement : document;
@@ -188,13 +188,13 @@ THREE.FirstPersonControls = function ( camera, domElement ) {
 
   };
 
-  this.update = function( delta ) {
+  this.update = function( delta, collisionResult ) {
 
     if ( this.enabled === false ) return;
 
     if ( this.heightSpeed ) {
 
-      var y = THREE.Math.clamp( this.camera.position.y, this.heightMin, this.heightMax );
+      var y = THREE.Math.clamp( this.object.position.y, this.heightMin, this.heightMax );
       var heightDelta = y - this.heightMin;
 
       this.autoSpeedFactor = delta * ( heightDelta * this.heightCoef );
@@ -208,19 +208,27 @@ THREE.FirstPersonControls = function ( camera, domElement ) {
     var actualMoveSpeed = delta * this.movementSpeed;
 
     if ( this.moveForward || ( this.autoForward && ! this.moveBackward ) ){
-      this.camera.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-      if(this.noFly) this.camera.position.y = this.noFlyYLock;
+      if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'front')){
+        this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
+      }
+      if(this.noFly){
+        this.object.position.y = this.noFlyYLock;
+      }
     }
     if ( this.moveBackward ){
-      this.camera.translateZ( actualMoveSpeed );
-      if(this.noFly) this.camera.position.y = this.noFlyYLock;
+      if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'back')){
+        this.object.translateZ( actualMoveSpeed );
+      }
+      if(this.noFly){
+        this.object.position.y = this.noFlyYLock;
+      }
     }
 
-    if ( this.moveLeft ) this.camera.translateX( - actualMoveSpeed );
-    if ( this.moveRight ) this.camera.translateX( actualMoveSpeed );
+    if ( this.moveLeft ) this.object.translateX( - actualMoveSpeed );
+    if ( this.moveRight ) this.object.translateX( actualMoveSpeed );
 
-    if ( this.moveUp && ! this.noFly ) this.camera.translateY( actualMoveSpeed );
-    if ( this.moveDown && ! this.noFly ) this.camera.translateY( - actualMoveSpeed );
+    if ( this.moveUp && ! this.noFly ) this.object.translateY( actualMoveSpeed );
+    if ( this.moveDown && ! this.noFly ) this.object.translateY( - actualMoveSpeed );
 
     var actualLookSpeed = delta * this.lookSpeed;
 
@@ -253,13 +261,13 @@ THREE.FirstPersonControls = function ( camera, domElement ) {
     }
 
     var targetPosition = this.target,
-      position = this.camera.position;
+      position = this.object.position;
 
     targetPosition.x = position.x + 100 * Math.sin( this.phi ) * Math.cos( this.theta );
     targetPosition.y = position.y + 100 * Math.cos( this.phi );
     targetPosition.z = position.z + 100 * Math.sin( this.phi ) * Math.sin( this.theta );
 
-    this.camera.lookAt( targetPosition );
+    this.object.lookAt( targetPosition );
 
   };
 

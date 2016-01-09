@@ -1,27 +1,33 @@
 /* utils */
 
 /**
- * Detects if there is a collision between msh and a list
- * @param  {THREE.Mesh} msh - Object to test collisions on
+ * Detects if there is a collision between a THREE.Object3D and a list of THREE.Mesh
+ * @param  {THREE.Object3D} obj - Object with child mesh to test collision on
  * @param  {THREE.Mesh[]} collidableMeshList - Array of meshes to test collision against
  * @return  {Object} result - Result of collision
  * @return  {boolean} result.isCollided - true if collision occurred
  * @return  {string} result.sideToBlock - Whether collision occurred on 'front', 'back' or 'none'
  */
-module.exports.detectCollision = function(msh, collidableMeshList){
+module.exports.detectCollision = function(obj, collidableMeshList){
     // collision detection:
     //   determines if any of the rays from the object's origin to each vertex
     //      intersects any face of a mesh in the array of target meshes
     //   for increased collision accuracy, add more vertices to the cube;
     //      for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
     //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
-    var originPoint = msh.position.clone();
+    var originPoint = obj.position.clone();
+    var msh;
+    obj.traverse(function(node){
+        if(node instanceof THREE.Mesh){
+            msh = node;
+        }
+    });
     //todo: use bounding box of msh
     
     for (var vertexIndex = 0; vertexIndex < msh.geometry.vertices.length; vertexIndex++){       
         var localVertex = msh.geometry.vertices[vertexIndex].clone();
-        var globalVertex = localVertex.applyMatrix4(msh.matrix);
-        var directionVector = globalVertex.sub(msh.position);
+        var globalVertex = localVertex.applyMatrix4(obj.matrix);
+        var directionVector = globalVertex.sub(obj.position);
         
         var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
         var collisionResults = ray.intersectObjects(collidableMeshList);

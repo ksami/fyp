@@ -1582,7 +1582,7 @@ var _persons = [];  // all person/user ids in scene except self
 var container, scene, camera, renderer, controls;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
-var collidableMeshList = [];
+var _collidableMeshList = [];
 var cube;
 var person;
 
@@ -1621,10 +1621,14 @@ function update(){
   // var moveDistance = SPEED_MOVE * delta;
   // var turnArc = SPEED_TURN * delta;
 
-  var collisionResult = Utils.detectCollision(person.getObjectByName('body'), collidableMeshList);
-   
-  // update mouse controls
-  controls.update(delta);
+  var collisionResult = Utils.detectCollision(person, _collidableMeshList);
+  // console.log(collisionResult);
+  // var collisionResult = {isCollided: true, sideToBlock: 'front'};
+  if(collisionResult.isCollided){
+    console.log(collisionResult);
+  }
+  // update controls
+  controls.update(delta, collisionResult);
 
   // // move forwards/backwards
   // if(keyboard.pressed('w')){
@@ -1691,9 +1695,10 @@ function setupScene(){
   // Person
   person = new Person(_user.id);
   person.position.set(12,1,12);
-  camera.position.set(3,3,3);
+  camera.position.set(2,3,4);
   person.add(camera);
   scene.add(person);
+
 
 
   //debug: Free Look
@@ -1717,11 +1722,11 @@ function setupScene(){
     //create 2 rows with corridor in between
     var room = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i].booths.length});
     scene.add(room);
-    collidableMeshList = collidableMeshList.concat(Utils.getMeshes(room));
+    _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(room));
 
     var room2 = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {numBooths: _event.rooms[i+1].booths.length, isMirror: true});
     scene.add(room2);
-    collidableMeshList = collidableMeshList.concat(Utils.getMeshes(room2));
+    _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(room2));
   }
 
 
@@ -1736,7 +1741,7 @@ function setupScene(){
   // Hall Walls
   var hall = Utils.createRoom(new THREE.Vector3(0,0,0), LENGTH_HALL, HEIGHT_HALL, BREADTH_HALL, {hasLight: false, hasBooths: false});
   scene.add(hall);
-  collidableMeshList = collidableMeshList.concat(Utils.getMeshes(hall));
+  _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(hall));
 
 
   // Skybox
@@ -1750,7 +1755,7 @@ function setupScene(){
   // jsonLoader.load('models/room.json', function(geometry, materials){
   //   var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
   //   scene.add(mesh);
-  //   collidableMeshList.push(mesh);
+  //   _collidableMeshList.push(mesh);
   // });
 }
 
@@ -1798,6 +1803,7 @@ socket.on('scene-state-change', function(update){
       var newperson = new Person(update.person.user.id);
       newperson.position.copy(update.person.position);
       newperson.rotation.copy(update.person.rotation);
+      newperson.getObjectByName('body').add(new THREE.AxisHelper(4));
       scene.add(newperson);
       _persons.push(update.person.user.id);
     }
@@ -1805,7 +1811,6 @@ socket.on('scene-state-change', function(update){
       var updateperson = scene.getObjectByName(update.person.user.id);
       updateperson.position.copy(update.person.position);
       updateperson.rotation.copy(update.person.rotation);
-      // updateperson.quaternion.copy(update.person.quaternion);
     }
   }
 });
@@ -1819,7 +1824,7 @@ var intervalUpdate = setInterval(function(){
       rotation: person.rotation
     });
   }
-}, 500);
+}, 100);
 },{"./person":3,"./utils":4,"underscore":1}],3:[function(require,module,exports){
 /**
  * Creates Person object
@@ -1856,27 +1861,33 @@ module.exports = Person;
 /* utils */
 
 /**
- * Detects if there is a collision between msh and a list
- * @param  {THREE.Mesh} msh - Object to test collisions on
+ * Detects if there is a collision between a THREE.Object3D and a list of THREE.Mesh
+ * @param  {THREE.Object3D} obj - Object with child mesh to test collision on
  * @param  {THREE.Mesh[]} collidableMeshList - Array of meshes to test collision against
  * @return  {Object} result - Result of collision
  * @return  {boolean} result.isCollided - true if collision occurred
  * @return  {string} result.sideToBlock - Whether collision occurred on 'front', 'back' or 'none'
  */
-module.exports.detectCollision = function(msh, collidableMeshList){
+module.exports.detectCollision = function(obj, collidableMeshList){
     // collision detection:
     //   determines if any of the rays from the object's origin to each vertex
     //      intersects any face of a mesh in the array of target meshes
     //   for increased collision accuracy, add more vertices to the cube;
     //      for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
     //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
-    var originPoint = msh.position.clone();
+    var originPoint = obj.position.clone();
+    var msh;
+    obj.traverse(function(node){
+        if(node instanceof THREE.Mesh){
+            msh = node;
+        }
+    });
     //todo: use bounding box of msh
     
     for (var vertexIndex = 0; vertexIndex < msh.geometry.vertices.length; vertexIndex++){       
         var localVertex = msh.geometry.vertices[vertexIndex].clone();
-        var globalVertex = localVertex.applyMatrix4(msh.matrix);
-        var directionVector = globalVertex.sub(msh.position);
+        var globalVertex = localVertex.applyMatrix4(obj.matrix);
+        var directionVector = globalVertex.sub(obj.position);
         
         var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
         var collisionResults = ray.intersectObjects(collidableMeshList);
