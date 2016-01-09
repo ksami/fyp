@@ -1583,7 +1583,6 @@ var container, scene, camera, renderer, controls;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 var _collidableMeshList = [];
-var cube;
 var person;
 
 
@@ -1618,39 +1617,36 @@ function update(){
 
   // delta = change in time since last call (seconds)
   var delta = clock.getDelta(); 
-  // var moveDistance = SPEED_MOVE * delta;
-  // var turnArc = SPEED_TURN * delta;
+  var moveDistance = SPEED_MOVE * delta;
+  var turnArc = SPEED_TURN * delta;
 
   var collisionResult = Utils.detectCollision(person, _collidableMeshList);
-  // console.log(collisionResult);
-  // var collisionResult = {isCollided: true, sideToBlock: 'front'};
-  if(collisionResult.isCollided){
-    console.log(collisionResult);
-  }
+
   // update controls
-  controls.update(delta, collisionResult);
+  controls.update();
 
-  // // move forwards/backwards
-  // if(keyboard.pressed('w')){
-  //   cube.translateZ(moveDistance);
-  //   if(collisionResult.isCollided && collisionResult.sideToBlock === 'front'){
-  //     cube.translateZ(-moveDistance);
-  //   }
-  // }
-  // if(keyboard.pressed('s')){
-  //   cube.translateZ(-moveDistance);
-  //   if(collisionResult.isCollided && collisionResult.sideToBlock === 'back'){
-  //     cube.translateZ(moveDistance);
-  //   }
-  // }
+  // Head copies camera's rotation
+  person.getObjectByName('head').rotation.copy(camera.rotation);
 
-  // // rotate left/right
-  // if(keyboard.pressed('a')){
-  //   cube.rotation.y += turnArc;
-  // }
-  // if(keyboard.pressed('d')){
-  //   cube.rotation.y -= turnArc;
-  // }
+  // move forwards/backwards
+  if(keyboard.pressed('w')){
+    if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'front')){
+      person.translateZ(-moveDistance);
+    }
+  }
+  if(keyboard.pressed('s')){
+    if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'back')){
+      person.translateZ(moveDistance);
+    }
+  }
+
+  // rotate left/right
+  if(keyboard.pressed('a')){
+    person.rotation.y += turnArc;
+  }
+  if(keyboard.pressed('d')){
+    person.rotation.y -= turnArc;
+  }
   
 }
 
@@ -1695,26 +1691,30 @@ function setupScene(){
   // Person
   person = new Person(_user.id);
   person.position.set(12,1,12);
-  camera.position.set(2,3,4);
+  camera.position.set(0,2,1);
   person.add(camera);
   scene.add(person);
 
 
 
-  //debug: Free Look
-  // controls = new THREE.OrbitControls(camera);
-  // controls.damping = 0.2;
-  // controls.addEventListener('change', render);
+  // 3rd Person Look
+  controls = new THREE.OrbitControls(camera);
+  controls.noPan = true;
+  controls.noRotate = false;
+  controls.minAzimuthAngle = -Math.PI/3;
+  controls.maxAzimuthAngle = Math.PI/3;
+  controls.target = new THREE.Vector3(0,2,0);
   // FPS Look
-  controls = new THREE.FirstPersonControls(person);
-  controls.movementSpeed = 2;
-  controls.lookSpeed = 0.04;
-  controls.lookVertical = true;
-  controls.constrainVertical = true;
-  controls.verticalMin = 1.3;
-  controls.verticalMax = 1.7;
-  controls.noFly = true;
-  controls.noFlyYLock = 1;
+  // controls = new THREE.FirstPersonControls(person);
+  // controls.movementSpeed = 3;
+  // controls.lookSpeed = 0.04;
+  // controls.lookVertical = false;
+  // controls.constrainVertical = true;
+  // controls.invertVertical = true;
+  // controls.verticalMin = 1.3;
+  // controls.verticalMax = 1.7;
+  // controls.noFly = true;
+  // controls.noFlyYLock = 1;
 
 
   // Rooms
@@ -1803,7 +1803,6 @@ socket.on('scene-state-change', function(update){
       var newperson = new Person(update.person.user.id);
       newperson.position.copy(update.person.position);
       newperson.rotation.copy(update.person.rotation);
-      newperson.getObjectByName('body').add(new THREE.AxisHelper(4));
       scene.add(newperson);
       _persons.push(update.person.user.id);
     }
@@ -1832,26 +1831,31 @@ var intervalUpdate = setInterval(function(){
  * @return {THREE.Object3D} Person
  */
 function Person(id){
-  var cubeGeometry = new THREE.BoxGeometry(1,2,1);
-  var cubeMaterial = new THREE.MeshPhongMaterial();
-  var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+  var bodyGeometry = new THREE.BoxGeometry(1,2,1);
+  var headGeometry = new THREE.BoxGeometry(0.5,0.5,0.5);
+  var bodyMaterial = new THREE.MeshPhongMaterial();
+  var body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+  var head = new THREE.Mesh(headGeometry, bodyMaterial);
 
-  // cube.position.set(12,1,12);
-  // cube.rotation.y = Math.PI/2;
-  // scene.add(cube);
-  // cube.position.set(0,-2,2);  // relative to camera
+  // body.position.set(12,1,12);
+  // body.rotation.y = Math.PI/2;
+  // scene.add(body);
+  // body.position.set(0,-2,2);  // relative to camera
 
-  // camera.position.set(0,2,-1);  // relative to cube
+  // camera.position.set(0,2,-1);  // relative to body
   // camera.lookAt(new THREE.Vector3(12,2,13));  // look in z direction
-  // cube.add(camera);
+  // body.add(camera);
   // camera.position.set(12,3,12);
   
   var person = new THREE.Object3D();
 
   person.name = id;
-  cube.name = 'body';
-  cube.position.set(0,0,0);
-  person.add(cube);
+  body.name = 'body';
+  head.name = 'head';
+  body.position.set(0,0,0);
+  head.position.set(0,1.5,0);
+  person.add(body);
+  person.add(head);
 
   return person;
 }

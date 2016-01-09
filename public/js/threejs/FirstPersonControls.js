@@ -209,7 +209,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
     if ( this.moveForward || ( this.autoForward && ! this.moveBackward ) ){
       if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'front')){
-        this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
+        this.object.translateZ( ( actualMoveSpeed + this.autoSpeedFactor ) );
       }
       if(this.noFly){
         this.object.position.y = this.noFlyYLock;
@@ -217,7 +217,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
     }
     if ( this.moveBackward ){
       if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'back')){
-        this.object.translateZ( actualMoveSpeed );
+        this.object.translateZ( -actualMoveSpeed );
       }
       if(this.noFly){
         this.object.position.y = this.noFlyYLock;
