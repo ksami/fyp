@@ -140,7 +140,7 @@ function setupScene(){
   // Person
   person = new Person(_user.id);
   person.position.set(12,1,12);
-  camera.position.set(0,2,1);
+  camera.position.set(0,2,3);
   person.add(camera);
   scene.add(person);
 
@@ -150,9 +150,11 @@ function setupScene(){
   controls = new THREE.OrbitControls(camera);
   controls.noPan = true;
   controls.noRotate = false;
+  controls.minPolarAngle = Math.PI/3;
+  controls.maxPolarAngle = 2*Math.PI/3;
   controls.minAzimuthAngle = -Math.PI/3;
   controls.maxAzimuthAngle = Math.PI/3;
-  controls.target = new THREE.Vector3(0,2,0);
+  controls.target = new THREE.Vector3(0,1.2,0);
   // FPS Look
   // controls = new THREE.FirstPersonControls(person);
   // controls.movementSpeed = 3;
@@ -263,7 +265,7 @@ socket.on('scene-state-change', function(update){
   }
 });
 
-// Emit person state change every 500ms
+// Emit person state change every 30ms
 var intervalUpdate = setInterval(function(){
   if(person){
     socket.emit('person-state-change', {
@@ -272,4 +274,4 @@ var intervalUpdate = setInterval(function(){
       rotation: person.rotation
     });
   }
-}, 100);
+}, 30);

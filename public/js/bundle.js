@@ -1691,7 +1691,7 @@ function setupScene(){
   // Person
   person = new Person(_user.id);
   person.position.set(12,1,12);
-  camera.position.set(0,2,1);
+  camera.position.set(0,2,3);
   person.add(camera);
   scene.add(person);
 
@@ -1701,9 +1701,11 @@ function setupScene(){
   controls = new THREE.OrbitControls(camera);
   controls.noPan = true;
   controls.noRotate = false;
+  controls.minPolarAngle = Math.PI/3;
+  controls.maxPolarAngle = 2*Math.PI/3;
   controls.minAzimuthAngle = -Math.PI/3;
   controls.maxAzimuthAngle = Math.PI/3;
-  controls.target = new THREE.Vector3(0,2,0);
+  controls.target = new THREE.Vector3(0,1.2,0);
   // FPS Look
   // controls = new THREE.FirstPersonControls(person);
   // controls.movementSpeed = 3;
@@ -1814,7 +1816,7 @@ socket.on('scene-state-change', function(update){
   }
 });
 
-// Emit person state change every 500ms
+// Emit person state change every 30ms
 var intervalUpdate = setInterval(function(){
   if(person){
     socket.emit('person-state-change', {
@@ -1823,7 +1825,7 @@ var intervalUpdate = setInterval(function(){
       rotation: person.rotation
     });
   }
-}, 100);
+}, 30);
 },{"./person":3,"./utils":4,"underscore":1}],3:[function(require,module,exports){
 /**
  * Creates Person object
@@ -1831,11 +1833,12 @@ var intervalUpdate = setInterval(function(){
  * @return {THREE.Object3D} Person
  */
 function Person(id){
-  var bodyGeometry = new THREE.BoxGeometry(1,2,1);
+  var bodyGeometry = new THREE.BoxGeometry(0.75,1.25,0.75);
   var headGeometry = new THREE.BoxGeometry(0.5,0.5,0.5);
-  var bodyMaterial = new THREE.MeshPhongMaterial();
+  var bodyMaterial = new THREE.MeshPhongMaterial({color: 0x336633});
+  var headMaterial = new THREE.MeshPhongMaterial({color: 0x336633});
   var body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-  var head = new THREE.Mesh(headGeometry, bodyMaterial);
+  var head = new THREE.Mesh(headGeometry, headMaterial);
 
   // body.position.set(12,1,12);
   // body.rotation.y = Math.PI/2;
@@ -1853,7 +1856,7 @@ function Person(id){
   body.name = 'body';
   head.name = 'head';
   body.position.set(0,0,0);
-  head.position.set(0,1.5,0);
+  head.position.set(0,0.875,0);
   person.add(body);
   person.add(head);
 
