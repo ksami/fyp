@@ -104,11 +104,12 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     var wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
 
     // Booths
-    //TODO: render booths along the 3 sides
+    //TODO: load textures from db posters
     if(opts.hasBooths){
         var margin = 4;
         var poster = THREE.ImageUtils.loadTexture('../images/a4poster.png');
         poster.mapS = poster.mapT = THREE.RepeatWrapping;
+        poster.minFilter = THREE.NearestFilter;
         var boothGeometry = new THREE.PlaneBufferGeometry(9, height-3);
         var boothMaterial = new THREE.MeshBasicMaterial({map: poster});
         // var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});

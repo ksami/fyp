@@ -24,6 +24,10 @@ exports = module.exports = function(req, res) {
         var eventid = req.params.id;
         res.locals.eventname = eventid;
         req.session.eventid = eventid;
+        req.session.user = {
+            id: req.user._id,
+            name: req.user.name.first + ' ' + req.user.name.last
+        };
 
         //find details of Event by querying db
         var Event = keystone.list('Event');

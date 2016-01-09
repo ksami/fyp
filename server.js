@@ -78,7 +78,9 @@ keystone.start({
             
             // session.eventid set in route controller for event
             socket.on('ack', function(){
-                socket.emit('syn-ack');
+                socket.emit('syn-ack', socket.handshake.session.user);
+                socket.join(socket.handshake.session.eventid);
+
                 // monitor the variable until db query sets it
                 var monitor = setInterval(function(){
                     if(typeof socket.handshake.session.eventDetails !== 'undefined'){
@@ -89,9 +91,16 @@ keystone.start({
                 }, 1000);
             });
 
+            socket.on('person-state-change', function(person){
+                socket.broadcast.to(socket.handshake.session.eventid).emit('scene-state-change', {
+                    person: person
+                });
+            });
+
             socket.on('disconnect', function(){
                 debugsocket('--- ' + socket.id + ' disconnected');
             });
         });
+
     }
 });
