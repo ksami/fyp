@@ -79,13 +79,15 @@ function update(){
 
   // move forwards/backwards
   if(keyboard.pressed('w')){
-    if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'front')){
-      person.translateZ(-moveDistance);
+    person.translateZ(-moveDistance);
+    if(collisionResult.isCollided && collisionResult.sideToBlock === 'front'){
+      person.translateZ(moveDistance);
     }
   }
   if(keyboard.pressed('s')){
-    if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'back')){
-      person.translateZ(moveDistance);
+    person.translateZ(moveDistance);
+    if(collisionResult.isCollided && collisionResult.sideToBlock === 'back'){
+      person.translateZ(-moveDistance);
     }
   }
 
@@ -155,17 +157,6 @@ function setupScene(){
   controls.minAzimuthAngle = -Math.PI/3;
   controls.maxAzimuthAngle = Math.PI/3;
   controls.target = new THREE.Vector3(0,1.2,0);
-  // FPS Look
-  // controls = new THREE.FirstPersonControls(person);
-  // controls.movementSpeed = 3;
-  // controls.lookSpeed = 0.04;
-  // controls.lookVertical = false;
-  // controls.constrainVertical = true;
-  // controls.invertVertical = true;
-  // controls.verticalMin = 1.3;
-  // controls.verticalMax = 1.7;
-  // controls.noFly = true;
-  // controls.noFlyYLock = 1;
 
 
   // Rooms

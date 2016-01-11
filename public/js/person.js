@@ -10,16 +10,6 @@ function Person(id){
   var headMaterial = new THREE.MeshPhongMaterial({color: 0x336633});
   var body = new THREE.Mesh(bodyGeometry, bodyMaterial);
   var head = new THREE.Mesh(headGeometry, headMaterial);
-
-  // body.position.set(12,1,12);
-  // body.rotation.y = Math.PI/2;
-  // scene.add(body);
-  // body.position.set(0,-2,2);  // relative to camera
-
-  // camera.position.set(0,2,-1);  // relative to body
-  // camera.lookAt(new THREE.Vector3(12,2,13));  // look in z direction
-  // body.add(camera);
-  // camera.position.set(12,3,12);
   
   var person = new THREE.Object3D();
 

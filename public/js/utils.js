@@ -1,5 +1,7 @@
 /* utils */
 
+var Booth = require('./booth');
+
 /**
  * Detects if there is a collision between a THREE.Object3D and a list of THREE.Mesh
  * @param  {THREE.Object3D} obj - Object with child mesh to test collision on
@@ -113,36 +115,29 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     //TODO: load textures from db posters
     if(opts.hasBooths){
         var margin = 4;
-        var poster = THREE.ImageUtils.loadTexture('../images/a4poster.png');
-        poster.mapS = poster.mapT = THREE.RepeatWrapping;
-        poster.minFilter = THREE.NearestFilter;
-        var boothGeometry = new THREE.PlaneBufferGeometry(9, height-3);
-        var boothMaterial = new THREE.MeshBasicMaterial({map: poster});
-        // var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
-        var boothMaterialb = new THREE.MeshPhongMaterial({color: 0x00ff00, side: THREE.DoubleSide});
-        
+      
         for(var i=0; i<4; i++){
-            var booth = new THREE.Mesh(boothGeometry, boothMaterial);
+            var booth = new Booth('http://i.imgur.com/5BkQYN0.png');
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
 
         // wall with door
-        var booth8 = new THREE.Mesh(boothGeometry, boothMaterial);
-        var booth9 = new THREE.Mesh(boothGeometry, boothMaterial);
+        var booth8 = new Booth();
+        var booth9 = new Booth();
         booth8.position.set(((0*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
         booth9.position.set(((3*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
         wallLength2.add(booth8);
         wallLength2.add(booth9);
 
         for(var i=0; i<2; i++){
-            var booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+            var booth = new Booth();
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth1.add(booth);
         }
 
         for(var i=0; i<2; i++){
-            var booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+            var booth = new Booth();
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth2.add(booth);
         }

@@ -1549,6 +1549,27 @@
 }.call(this));
 
 },{}],2:[function(require,module,exports){
+function Booth(posterTextureUrl){
+  var url = posterTextureUrl || '../images/a4poster.png';
+
+  THREE.ImageUtils.crossOrigin = '';
+  var posterTexture = THREE.ImageUtils.loadTexture(url);
+  posterTexture.mapS = posterTexture.mapT = THREE.RepeatWrapping;
+  posterTexture.minFilter = THREE.NearestFilter;
+
+  var boothGeometry = new THREE.PlaneBufferGeometry(9, 8);
+  var boothMaterial = new THREE.MeshBasicMaterial({map: posterTexture});
+  
+  var booth = new THREE.Object3D();
+
+  var poster = new THREE.Mesh(boothGeometry, boothMaterial);
+  booth.add(poster);
+
+  return booth;
+}
+
+module.exports = Booth;
+},{}],3:[function(require,module,exports){
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 //////////////
@@ -1630,13 +1651,15 @@ function update(){
 
   // move forwards/backwards
   if(keyboard.pressed('w')){
-    if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'front')){
-      person.translateZ(-moveDistance);
+    person.translateZ(-moveDistance);
+    if(collisionResult.isCollided && collisionResult.sideToBlock === 'front'){
+      person.translateZ(moveDistance);
     }
   }
   if(keyboard.pressed('s')){
-    if(!(collisionResult.isCollided && collisionResult.sideToBlock === 'back')){
-      person.translateZ(moveDistance);
+    person.translateZ(moveDistance);
+    if(collisionResult.isCollided && collisionResult.sideToBlock === 'back'){
+      person.translateZ(-moveDistance);
     }
   }
 
@@ -1706,17 +1729,6 @@ function setupScene(){
   controls.minAzimuthAngle = -Math.PI/3;
   controls.maxAzimuthAngle = Math.PI/3;
   controls.target = new THREE.Vector3(0,1.2,0);
-  // FPS Look
-  // controls = new THREE.FirstPersonControls(person);
-  // controls.movementSpeed = 3;
-  // controls.lookSpeed = 0.04;
-  // controls.lookVertical = false;
-  // controls.constrainVertical = true;
-  // controls.invertVertical = true;
-  // controls.verticalMin = 1.3;
-  // controls.verticalMax = 1.7;
-  // controls.noFly = true;
-  // controls.noFlyYLock = 1;
 
 
   // Rooms
@@ -1826,7 +1838,7 @@ var intervalUpdate = setInterval(function(){
     });
   }
 }, 30);
-},{"./person":3,"./utils":4,"underscore":1}],3:[function(require,module,exports){
+},{"./person":4,"./utils":5,"underscore":1}],4:[function(require,module,exports){
 /**
  * Creates Person object
  * @param {String} id - database _id of User to use as person.name
@@ -1839,16 +1851,6 @@ function Person(id){
   var headMaterial = new THREE.MeshPhongMaterial({color: 0x336633});
   var body = new THREE.Mesh(bodyGeometry, bodyMaterial);
   var head = new THREE.Mesh(headGeometry, headMaterial);
-
-  // body.position.set(12,1,12);
-  // body.rotation.y = Math.PI/2;
-  // scene.add(body);
-  // body.position.set(0,-2,2);  // relative to camera
-
-  // camera.position.set(0,2,-1);  // relative to body
-  // camera.lookAt(new THREE.Vector3(12,2,13));  // look in z direction
-  // body.add(camera);
-  // camera.position.set(12,3,12);
   
   var person = new THREE.Object3D();
 
@@ -1864,8 +1866,10 @@ function Person(id){
 }
 
 module.exports = Person;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /* utils */
+
+var Booth = require('./booth');
 
 /**
  * Detects if there is a collision between a THREE.Object3D and a list of THREE.Mesh
@@ -1980,36 +1984,29 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     //TODO: load textures from db posters
     if(opts.hasBooths){
         var margin = 4;
-        var poster = THREE.ImageUtils.loadTexture('../images/a4poster.png');
-        poster.mapS = poster.mapT = THREE.RepeatWrapping;
-        poster.minFilter = THREE.NearestFilter;
-        var boothGeometry = new THREE.PlaneBufferGeometry(9, height-3);
-        var boothMaterial = new THREE.MeshBasicMaterial({map: poster});
-        // var boothMaterial = new THREE.MeshPhongMaterial({color: 0xff0000, side: THREE.DoubleSide});
-        var boothMaterialb = new THREE.MeshPhongMaterial({color: 0x00ff00, side: THREE.DoubleSide});
-        
+      
         for(var i=0; i<4; i++){
-            var booth = new THREE.Mesh(boothGeometry, boothMaterial);
+            var booth = new Booth('http://i.imgur.com/5BkQYN0.png');
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
 
         // wall with door
-        var booth8 = new THREE.Mesh(boothGeometry, boothMaterial);
-        var booth9 = new THREE.Mesh(boothGeometry, boothMaterial);
+        var booth8 = new Booth();
+        var booth9 = new Booth();
         booth8.position.set(((0*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
         booth9.position.set(((3*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
         wallLength2.add(booth8);
         wallLength2.add(booth9);
 
         for(var i=0; i<2; i++){
-            var booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+            var booth = new Booth();
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth1.add(booth);
         }
 
         for(var i=0; i<2; i++){
-            var booth = new THREE.Mesh(boothGeometry, boothMaterialb);
+            var booth = new Booth();
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth2.add(booth);
         }
@@ -2044,4 +2041,4 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
 
     return room;
 }
-},{}]},{},[2]);
+},{"./booth":2}]},{},[3]);
