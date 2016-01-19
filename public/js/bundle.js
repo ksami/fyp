@@ -1549,6 +1549,66 @@
 }.call(this));
 
 },{}],2:[function(require,module,exports){
+/**
+ * @author jingpingji http://www.jingpingji.com
+ */
+
+/** Handle audio playback */
+function AudioController(client){
+
+  var audioController = {};
+
+  var audioContext = window.AudioContext || window.webkitAudioContext;
+
+  audioController.speakerContext = new audioContext();
+
+  client.on('stream', function (stream) {
+    audioController.nextTime = 0;
+    var init = false;
+    var audioCache = [];
+
+    console.log('>>> Receiving Audio Stream');
+
+    stream.on('data', function (data) {
+      var array = new Float32Array(data);
+      var buffer = audioController.speakerContext.createBuffer(1, 2048, 44100);
+      buffer.copyToChannel(array, 0);
+
+      audioCache.push(buffer);
+      // make sure we put at least 5 chunks in the buffer before starting
+      if ((init === true) || ((init === false) && (audioCache.length > 5))) { 
+          init = true;
+          audioController.playCache(audioCache);
+      }
+    });
+
+    stream.on('end', function () {
+      console.log('||| End of Audio Stream');    
+    });
+
+  });
+
+  audioController.playCache = function (cache) {
+    while (cache.length) {
+      var buffer = cache.shift();
+      var source    = audioController.speakerContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioController.speakerContext.destination);
+      if (audioController.nextTime == 0) {
+          // add a delay of 0.05 seconds
+          audioController.nextTime = audioController.speakerContext.currentTime + 0.05;  
+      }
+      source.start(audioController.nextTime);
+      // schedule buffers to be played consecutively
+      audioController.nextTime+=source.buffer.duration;  
+    }
+  };
+
+  return audioController;
+}
+
+module.exports = AudioController;
+},{}],3:[function(require,module,exports){
 function Booth(posterTextureUrl){
   var url = posterTextureUrl || '../images/a4poster.png';
 
@@ -1569,7 +1629,7 @@ function Booth(posterTextureUrl){
 }
 
 module.exports = Booth;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 //////////////
@@ -1578,6 +1638,8 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var _ = require('underscore');
 var Utils = require('./utils');
 var Person = require('./person');
+var MicController = require('./micController');
+var AudioController = require('./audioController');
 
 
 
@@ -1605,6 +1667,8 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 var _collidableMeshList = [];
 var person;
+
+var _mic, _audio;
 
 
 ///////////
@@ -1787,6 +1851,7 @@ socket.on('syn-ack', function(user){
 });
 socket.on('disconnect', function(){
   console.log('disconnected');
+  _mic.stopRecording();
 });
 
 socket.on('eventDetails', function(event){
@@ -1809,6 +1874,7 @@ socket.on('eventDetails', function(event){
   /////////////
   init();
   run();
+
 });
 
 socket.on('scene-state-change', function(update){
@@ -1838,7 +1904,121 @@ var intervalUpdate = setInterval(function(){
     });
   }
 }, 30);
-},{"./person":4,"./utils":5,"underscore":1}],4:[function(require,module,exports){
+
+
+
+//////////////
+// Binaryjs //
+//////////////
+
+// Connect to Binary.js server
+var binaryclient = new BinaryClient('ws://localhost:9000');
+_mic = new MicController(binaryclient);
+_audio = new AudioController(binaryclient);
+
+document.getElementById('record').onclick = function(){
+  //todo: when to start recording?
+  _mic.startRecording();
+};
+document.getElementById('stop').onclick = function(){
+  _mic.stopRecording();
+};
+},{"./audioController":2,"./micController":5,"./person":6,"./utils":7,"underscore":1}],5:[function(require,module,exports){
+/**
+ * @author jingpingji http://www.jingpingji.com
+ */
+
+/** Handle recording */
+function MicController(client){
+  //initializing variables;
+  var micController = {};
+  micController.recording = false;
+
+  var audioContext = window.AudioContext || window.webkitAudioContext;
+
+  navigator.mediaDevices = navigator.mediaDevices || 
+     ((navigator.mozGetUserMedia || navigator.webkitGetUserMedia) ? {
+       getUserMedia: function(c) {
+         return new Promise(function(y, n) {
+           (navigator.mozGetUserMedia ||
+            navigator.webkitGetUserMedia).call(navigator, c, y, n);
+         });
+       }
+  } : null);
+
+  if (!navigator.mediaDevices) {
+    console.log("getUserMedia() not supported.");
+  }
+
+  micController.device = navigator.mediaDevices.getUserMedia({ audio: true, 
+    video: false });
+
+  micController.device.then(function (stream) {
+    var context = new audioContext();
+    var audioInput = context.createMediaStreamSource(stream);
+    var bufferSize = 2048;
+    // create a javascript node
+    micController.recorder = context.createScriptProcessor(bufferSize, 1, 1);
+    // specify the processing function
+    micController.recorder.onaudioprocess = micController.recorderProcess;
+    // connect stream to our recorder
+    audioInput.connect(micController.recorder);
+    // connect our recorder to the previous destination
+    micController.recorder.connect(context.destination);
+  });
+
+  micController.device.catch(function (err) {
+    console.log("The following error occured: " + err.name);
+  });
+
+  function convertFloat32ToInt16(buffer) {
+    l = buffer.length;
+    buf = new Int16Array(l);
+    while (l--) {
+      buf[l] = Math.min(1, buffer[l])*0x7FFF;
+    }
+    return buf.buffer;
+  }
+
+  micController.recorderProcess = function (e) {
+    var left = e.inputBuffer.getChannelData(0);
+    if (micController.recording === true) {
+      // var chunk = convertFloat32ToInt16(left);
+      var chunk = left;
+      // console.dir(chunk);
+      micController.stream.write(chunk);
+    }
+  };
+
+  micController.startRecording = function () {
+
+    if (micController.recording === false) {
+      console.log('>>> Start Recording');
+
+      //open binary stream
+      micController.stream = client.createStream({data: 'audio'});
+      micController.recording = true;
+    }
+
+  };
+
+  micController.stopRecording = function () {
+    
+    if (micController.recording === true) {
+      console.log('||| Stop Recording');
+
+      micController.recording = false;
+
+      //close binary stream
+      micController.stream.end();
+    }
+  };
+
+  return micController;
+}
+
+module.exports = MicController;
+},{}],6:[function(require,module,exports){
 /**
  * Creates Person object
  * @param {String} id - database _id of User to use as person.name
@@ -1866,7 +2046,7 @@ function Person(id){
 }
 
 module.exports = Person;
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* utils */
 
 var Booth = require('./booth');
@@ -1986,7 +2166,7 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
         var margin = 4;
       
         for(var i=0; i<4; i++){
-            var booth = new Booth('http://i.imgur.com/5BkQYN0.png');
+            var booth = new Booth();
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
@@ -2041,4 +2221,4 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
 
     return room;
 }
-},{"./booth":2}]},{},[3]);
+},{"./booth":3}]},{},[4]);

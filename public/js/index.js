@@ -6,6 +6,8 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var _ = require('underscore');
 var Utils = require('./utils');
 var Person = require('./person');
+var MicController = require('./micController');
+var AudioController = require('./audioController');
 
 
 
@@ -33,6 +35,8 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 var _collidableMeshList = [];
 var person;
+
+var _mic, _audio;
 
 
 ///////////
@@ -215,6 +219,7 @@ socket.on('syn-ack', function(user){
 });
 socket.on('disconnect', function(){
   console.log('disconnected');
+  _mic.stopRecording();
 });
 
 socket.on('eventDetails', function(event){
@@ -237,6 +242,7 @@ socket.on('eventDetails', function(event){
   /////////////
   init();
   run();
+
 });
 
 socket.on('scene-state-change', function(update){
@@ -266,3 +272,22 @@ var intervalUpdate = setInterval(function(){
     });
   }
 }, 30);
+
+
+
+//////////////
+// Binaryjs //
+//////////////
+
+// Connect to Binary.js server
+var binaryclient = new BinaryClient('ws://localhost:9000');
+_mic = new MicController(binaryclient);
+_audio = new AudioController(binaryclient);
+
+document.getElementById('record').onclick = function(){
+  //todo: when to start recording?
+  _mic.startRecording();
+};
+document.getElementById('stop').onclick = function(){
+  _mic.stopRecording();
+};
