@@ -10,6 +10,16 @@ block content
     button#record Record
     button#stop Stop
     #threejs
+    #chatbox-wrapper
+        #chatbox
+            ul#chatmessages
+                li Hello World!
+        form#chatsubmit
+            .input-group
+                input#chat.form-control(type="text")
+                span.input-group-btn
+                    button.btn.btn-default(type="submit") Send
+
 
 block css
     link(rel="stylesheet" href="/css/style.css" type="text/css")

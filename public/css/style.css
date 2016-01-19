@@ -1,0 +1,39 @@
+#chatbox-wrapper{
+  width: 20%;
+  min-width: 300px;
+  height: 12em;
+  position: fixed;
+  bottom: 0px;
+  background-color: rgba(0,0,0,0.3);
+  padding: 10px;
+}
+
+#chatbox{
+  height: 8em;
+}
+
+#chatmessages{
+  overflow-y: auto;
+  height: 100%;
+  margin-top: 5px;
+  color: #ffffff;
+  text-shadow: 1px 1px 3px #000;
+  list-style-type: none;
+  padding-left: 0px;
+}
+
+#chatsubmit{
+  margin-top: 5px;
+  bottom: 0px;
+  width: 100%;
+}
+
+#chat{
+  color: #000000;
+}
+
+
+.text-admin{
+  color: #ff0000;
+  text-decoration: 
+}

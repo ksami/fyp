@@ -7,33 +7,28 @@ block intro
     h1 create new event
 
 block content
-    .row
+    .container-fluid: .row: .col-md-12
         if isCreated == false
             if errMsg
                 h4= errMsg
-            h3 Event Details
+            h3.row: .col-md-6 Event Details
             form(name='event-details', method='post')
                 input(type='hidden', name='action', value='create-event')
-                .row: .input-field.col.s12
-                    input(type='text', name='name')
+                .form-group
                     label(for='name') Name
-                .row: .input-field.col.s12
-                    select(name='posterSize')
-                        option(value='A0') A0
-                        option(value='A1') A1
-                    label Size of posters
-                .row: .input-field.col.s12
-                    textarea.materialize-textarea(name='categories')
+                    input.form-control(type='text', name='name')
+                .form-group
                     label(for='categories') Categories
-                .row: .input-field.col.s12
-                    textarea.materialize-textarea(name='csv', rows='10', cols='50')
+                    textarea.form-control(name='categories')
+                .form-group
                     label(for='csv') CSV
-                .row: .input-field.col.s12
-                    input(type='checkbox', name='hasHeader')
-                    label(for='hasHeader') My data has a header row
-                .row: .input-field.col.s12
-                    button.btn.waves-effect.waves-light(type='submit') Submit
-                        i.material-icons.right send
+                    textarea.form-control(name='csv', rows='10', cols='50')
+                .checkbox
+                    label(for='hasHeader')
+                        input(type='checkbox', name='hasHeader')
+                        | My data has a header row
+                button.btn.btn-default(type='submit') Submit
+
         else
             h3 Event successfully created
             div

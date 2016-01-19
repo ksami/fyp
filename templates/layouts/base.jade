@@ -11,16 +11,18 @@ html
         title= title || "My Keystone Website"
         link(rel="shortcut icon", href="/favicon.ico", type="image/x-icon")
         
-        link(rel="stylesheet", href="http://fonts.googleapis.com/icon?family=Material+Icons")
-        link(rel="stylesheet", href="/css/materialize.min.css", media="screen,projection")
-        link(rel="stylesheet", href="/css/style.css")
+        link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous")
+
+        script(src="//code.jquery.com/jquery-1.12.0.min.js")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous")
 
         block css
         block head
     body
-        nav: .nav-wrapper
-            a.brand-logo(href="/") vPoster
-            ul.right.hide-on-med-and-down
+        nav: .navbar.navbar-default
+            .container-fluid
+            .navbar-header: a.navbar-brand(href="/") vPoster
+            .collapse.navbar-collapse: ul.nav.navbar-nav.navbar-right
                 each link in navLinks
                     li: a(href=link.href)= link.label
                 if user
@@ -31,15 +33,13 @@ html
             
         #body
             
-            block intro
+            .container-fluid
+                block intro
             
             +flash-messages(messages)
             
             block content
         
-        #footer Powered by <a href="http://keystonejs.com", target="_blank">KeystoneJS</a>.
-    
-    script(src="https://code.jquery.com/jquery-2.1.1.min.js")
-    script(src="/js/materialize/materialize.min.js")
+        #footer.container-fluid Powered by <a href="http://keystonejs.com", target="_blank">KeystoneJS</a>.
 
     block js
