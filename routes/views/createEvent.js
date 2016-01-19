@@ -126,7 +126,6 @@ exports = module.exports = function(req, res) {
 
                 // Create Booths
 
-                //TODO: poster size
                 var booth = new Booth.model({
                     poster: '',
                     user: user._id

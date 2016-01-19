@@ -25,6 +25,8 @@
 // # Code
 //
 
+/** edited by ksami - added in pause and unpause */
+
 /** @namespace */
 var THREEx	= THREEx 		|| {};
 
@@ -58,6 +60,18 @@ THREEx.KeyboardState	= function(domElement)
 
 	// bind window blur
 	window.addEventListener("blur", this._onBlur, false);
+}
+
+THREEx.KeyboardState.prototype.pause = function(){
+	// unbind keyEvents
+	this.domElement.removeEventListener("keydown", this._onKeyDown, false);
+	this.domElement.removeEventListener("keyup", this._onKeyUp, false);
+}
+
+THREEx.KeyboardState.prototype.unpause = function(){
+	// bind keyEvents
+	this.domElement.addEventListener("keydown", this._onKeyDown, false);
+	this.domElement.addEventListener("keyup", this._onKeyUp, false);
 }
 
 /**

@@ -31,7 +31,7 @@ var HEIGHT_CORRIDOR = 10;
 var _event, _user;
 var _persons = [];  // all person/user ids in scene except self
 var container, scene, camera, renderer, controls;
-var keyboard = new THREEx.KeyboardState();
+var keyboard = new THREEx.KeyboardState(document.getElementById('threejs'));
 var clock = new THREE.Clock();
 var _collidableMeshList = [];
 var person;
@@ -102,6 +102,8 @@ function update(){
   if(keyboard.pressed('d')){
     person.rotation.y -= turnArc;
   }
+
+
   
 }
 
@@ -130,9 +132,8 @@ function setupScene(){
     renderer = new THREE.CanvasRenderer(); 
   }
 
-  //note: window.innerWidth/2 and window.innerHeight/2 will give half resolution
-  //useful for performance intensive
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  // set size of canvas
+  renderer.setSize(window.innerWidth, window.innerHeight-90);
 
   container = document.getElementById('threejs');
   container.appendChild(renderer.domElement);
@@ -153,7 +154,7 @@ function setupScene(){
 
 
   // 3rd Person Look
-  controls = new THREE.OrbitControls(camera);
+  controls = new THREE.OrbitControls(camera, document.getElementById('threejs'));
   controls.noPan = true;
   controls.noRotate = false;
   controls.minPolarAngle = Math.PI/3;
@@ -206,6 +207,7 @@ function setupScene(){
 }
 
 
+
 //////////////
 // Socketio //
 //////////////
@@ -222,9 +224,9 @@ socket.on('disconnect', function(){
   _mic.stopRecording();
 });
 
-socket.on('eventDetails', function(event){
+socket.on('event-details', function(event){
   _event = event;
-  console.log('+++ eventDetails received');
+  console.log('+++ event details received');
   console.log(event);
 
   // get rid of loading message
@@ -273,6 +275,54 @@ var intervalUpdate = setInterval(function(){
   }
 }, 30);
 
+
+//////////
+// Chat //
+//////////
+socket.on('chat-text-receive', function(text){
+  if(typeof text.class === 'undefined') {
+    $('#chatmessages').append($('<li>').text(text.sender+'> '+text.msg));  
+  }
+  else {
+    $('#chatmessages').append($('<li>').text(text.sender+'> '+text.msg).addClass(text.class));
+  }
+  scrollToBottom('#chatmessages');
+});
+
+// BUG: chatbox focus should disable movement
+$(function(){
+  $('#chatsubmit').submit(function(){
+    var msg = $('#chat').val();
+    msg = msg.trim();
+
+    if(msg === '') return false;
+
+    //echo everything typed in, whitespaced trimmed
+    $('#chatmessages').append($('<li>').text(_user.name+'> '+ msg));
+    scrollToBottom('#chatmessages');
+    
+    socket.emit('chat-text-send', {sender: _user.name, msg: msg});
+
+    $('#chat').val('');
+    return false;
+  });
+
+  $('chatbox-wrapper').focusin(function(e){
+    keyboard.pause();
+    console.log('keyboard paused');
+  });
+  $('chatbox-wrapper').focusout(function(e){
+    keyboard.unpause();
+  });
+});
+
+function scrollToBottom(id) {
+  var buffer = 500;
+  if( $('#chatmessages li').length > buffer*2) {
+    $('#chatmessages li').slice(0,buffer).remove();
+  }
+  $(id).scrollTop($(id)[0].scrollHeight);
+}
 
 
 //////////////

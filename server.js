@@ -85,10 +85,14 @@ keystone.start({
                 var monitor = setInterval(function(){
                     if(typeof socket.handshake.session.eventDetails !== 'undefined'){
                         clearInterval(monitor);
-                        socket.emit('eventDetails', socket.handshake.session.eventDetails);
+                        socket.emit('event-details', socket.handshake.session.eventDetails);
                         delete socket.handshake.session.eventDetails;
                     }
                 }, 1000);
+            });
+
+            socket.on('chat-text-send', function(msg){
+                socket.broadcast.to(socket.handshake.session.eventid).emit('chat-text-receive', msg);
             });
 
             socket.on('person-state-change', function(person){
