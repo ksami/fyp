@@ -9,12 +9,12 @@ block content
     h3#loading Loading...
     button#record Record
     button#stop Stop
-    #threejs
+    #threejs(tabindex="1")
     #chatbox-wrapper
         #chatbox
             ul#chatmessages
                 li Hello World!
-        form#chatsubmit
+        form#chatsubmit(tabindex="2")
             .input-group
                 input#chat.form-control(type="text")
                 span.input-group-btn

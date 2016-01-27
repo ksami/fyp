@@ -44,6 +44,10 @@ var _mic, _audio;
 ///////////
 function init(){
   setupScene();
+
+  $('#threejs').on('click', function(){
+    this.focus();
+  });
 }
 
 
@@ -102,8 +106,6 @@ function update(){
   if(keyboard.pressed('d')){
     person.rotation.y -= turnArc;
   }
-
-
   
 }
 
@@ -295,7 +297,10 @@ $(function(){
     var msg = $('#chat').val();
     msg = msg.trim();
 
-    if(msg === '') return false;
+    if(msg === ''){
+      $('#threejs').focus();
+      return false;
+    }
 
     //echo everything typed in, whitespaced trimmed
     $('#chatmessages').append($('<li>').text(_user.name+'> '+ msg));
@@ -307,19 +312,12 @@ $(function(){
     return false;
   });
 
-  $('chatbox-wrapper').focusin(function(e){
-    keyboard.pause();
-    console.log('keyboard paused');
-  });
-  $('chatbox-wrapper').focusout(function(e){
-    keyboard.unpause();
-  });
 });
 
 function scrollToBottom(id) {
   var buffer = 500;
-  if( $('#chatmessages li').length > buffer*2) {
-    $('#chatmessages li').slice(0,buffer).remove();
+  if( $(id + ' li').length > buffer*2) {
+    $(id + ' li').slice(0,buffer).remove();
   }
   $(id).scrollTop($(id)[0].scrollHeight);
 }
