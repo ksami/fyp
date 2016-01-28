@@ -254,6 +254,7 @@ socket.on('scene-state-change', function(update){
       var newperson = new Person(update.person.user.id, update.person.user.name);
       newperson.position.copy(update.person.position);
       newperson.rotation.copy(update.person.rotation);
+      newperson.getObjectByName('head').rotation.copy(update.person.headRotation);
       scene.add(newperson);
       _persons.push(update.person.user.id);
     }
@@ -261,6 +262,7 @@ socket.on('scene-state-change', function(update){
       var updateperson = scene.getObjectByName(update.person.user.id);
       updateperson.position.copy(update.person.position);
       updateperson.rotation.copy(update.person.rotation);
+      updateperson.getObjectByName('head').rotation.copy(update.person.headRotation);
     }
   }
 });
@@ -271,7 +273,8 @@ var intervalUpdate = setInterval(function(){
     socket.emit('person-state-change', {
       user: _user,
       position: person.position,
-      rotation: person.rotation
+      rotation: person.rotation,
+      headRotation: person.getObjectByName('head').rotation
     });
   }
 }, 30);
