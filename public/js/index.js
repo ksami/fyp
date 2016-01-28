@@ -147,12 +147,11 @@ function setupScene(){
 
 
   // Person
-  person = new Person(_user.id);
+  person = new Person(_user.id, _user.name);
   person.position.set(12,1,12);
   camera.position.set(0,2,3);
   person.add(camera);
   scene.add(person);
-
 
 
   // 3rd Person Look
@@ -252,7 +251,7 @@ socket.on('event-details', function(event){
 socket.on('scene-state-change', function(update){
   if(scene){
     if(!(_.contains(_persons, update.person.user.id))){
-      var newperson = new Person(update.person.user.id);
+      var newperson = new Person(update.person.user.id, update.person.user.name);
       newperson.position.copy(update.person.position);
       newperson.rotation.copy(update.person.rotation);
       scene.add(newperson);
@@ -291,7 +290,6 @@ socket.on('chat-text-receive', function(text){
   scrollToBottom('#chatmessages');
 });
 
-// BUG: chatbox focus should disable movement
 $(function(){
   $('#chatsubmit').submit(function(){
     var msg = $('#chat').val();

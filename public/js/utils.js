@@ -117,7 +117,7 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
         var margin = 4;
       
         for(var i=0; i<4; i++){
-            var booth = new Booth('http://i.imgur.com/5BkQYN0.png');
+            var booth = new Booth();
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
