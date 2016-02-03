@@ -5,6 +5,8 @@
 require('dotenv').load();
 var socketio = require('socket.io');
 var keystone = require('keystone');
+var mongoose = require('mongoose');
+keystone.set('mongoose', mongoose);
 var debugsocket = require('debug')('vPoster:socket');
 var debugdb = require('debug')('vPoster:db');
 var debug = require('debug')('vPoster:info');

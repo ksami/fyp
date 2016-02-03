@@ -35,10 +35,13 @@ exports = module.exports = function(req, res) {
         .where('name').equals(eventid)
         .populate({
             path: 'rooms',
+            model: 'Room',
             populate: {
                 path: 'booths',
+                model: 'Booth',
                 populate: {
                     path: 'user',
+                    model: 'User',
                     select: 'name'
                 }
             }
