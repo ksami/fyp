@@ -71,16 +71,16 @@ module.exports.getMeshes = function(obj){
  * @param  {number} height - Height of the room in the y-axis
  * @param  {number} breadth - Breadth of the walls in the z-axis
  * @param {Object=} opts - Options for creating the room
- * @param {integer} [opts.numBooths=0] - Number of booths in the room that will be visible
  * @param {boolean} [opts.hasBooths=true] - If true, creates 10 booths
  * @param {boolean} [opts.hasLight=true] - If true, creates a main light in the center of the room
  * @param {boolean} [opts.hasDoor=false] - If true, creates a door for the room
  * @param {boolean} [opts.isMirror=false] If true, rotates room by PI
+ * @param {[String]} [opts.booths=[]] - URLs of posters to add to booths
  * @return  {THREE.Object3D} room - Dummy room object to group walls and light
  */
 module.exports.createRoom = function(corner, length, height, breadth, opts){
     opts = opts || {};
-    opts.numBooths = opts.numBooths || 0;
+    opts.booths = opts.booths || [];
     opts.hasBooths = typeof opts.hasBooths === 'undefined' ? true : opts.hasBooths;
     opts.hasLight = typeof opts.hasLight === 'undefined' ? true : opts.hasLight;
     opts.hasDoor = typeof opts.hasDoor === 'undefined' ? false : opts.hasDoor;
@@ -100,14 +100,24 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
         pointLight.position.set(x+length/2,y+20,z+breadth/2);
         room.add(pointLight);
     }
+    var doorWidth = 6;
 
     var wallLengthGeometry = new THREE.PlaneBufferGeometry(length, height);
+    var wallLength2Geometry = new THREE.PlaneBufferGeometry((length-doorWidth*2)/2, height);
     var wallBreadthGeometry = new THREE.PlaneBufferGeometry(breadth, height);
 
     var wallMaterial = new THREE.MeshPhongMaterial({color: 0x999999, side: THREE.DoubleSide});
 
     var wallLength1 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
-    var wallLength2 = new THREE.Mesh(wallLengthGeometry, wallMaterial);
+
+    var wallLength2 = new THREE.Object3D();
+    var halfWall1 = new THREE.Mesh(wallLength2Geometry, wallMaterial);
+    var halfWall2 = new THREE.Mesh(wallLength2Geometry, wallMaterial);
+    halfWall1.position.set(-(doorWidth+((length-doorWidth*2)/4)), 0, 0);
+    halfWall2.position.set(doorWidth+((length-doorWidth*2)/4), 0, 0);
+    wallLength2.add(halfWall1);
+    wallLength2.add(halfWall2);
+
     var wallBreadth1 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
     var wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
 
