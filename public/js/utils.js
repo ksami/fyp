@@ -123,33 +123,34 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
 
     // Booths
     //TODO: load textures from db posters
-    if(opts.hasBooths){
+    if(opts.hasBooths && opts.booths.length>0){
         var margin = 4;
+        var boothIdx = 0;
+        var booths = opts.booths;
       
-        for(var i=0; i<4; i++){
-            var booth = new Booth();
+        for(var i=0; i<4 && boothIdx<booths.length; i++){
+            var booth = new Booth(booths[boothIdx++].poster);
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
 
-        // wall with door
-        var booth8 = new Booth();
-        var booth9 = new Booth();
-        booth8.position.set(((0*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
-        booth9.position.set(((3*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
-        wallLength2.add(booth8);
-        wallLength2.add(booth9);
-
-        for(var i=0; i<2; i++){
-            var booth = new Booth();
+        for(var i=0; i<2 && boothIdx<booths.length; i++){
+            var booth = new Booth(booths[boothIdx++].poster);
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth1.add(booth);
         }
 
-        for(var i=0; i<2; i++){
-            var booth = new Booth();
+        for(var i=0; i<2 && boothIdx<booths.length; i++){
+            var booth = new Booth(booths[boothIdx++].poster);
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth2.add(booth);
+        }
+
+        // wall with door
+        for(var i=0; i<2 && boothIdx<booths.length; i++){
+            var booth = new Booth(booths[boothIdx++].poster);
+            booth.position.set((((i*3)*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
+            wallLength2.add(booth);   
         }
     }
 

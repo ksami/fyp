@@ -1,5 +1,11 @@
 function Booth(posterTextureUrl){
-  var url = posterTextureUrl || '../images/a4poster.png';
+  var url;
+  if(typeof posterTextureUrl === 'undefined' || posterTextureUrl === ''){
+    url = '../images/a4poster.png';
+  }
+  else{
+    url = posterTextureUrl;
+  }
 
   THREE.ImageUtils.crossOrigin = '';
   var posterTexture = THREE.ImageUtils.loadTexture(url);
