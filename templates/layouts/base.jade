@@ -25,8 +25,9 @@ html
             .collapse.navbar-collapse: ul.nav.navbar-nav.navbar-right
                 each link in navLinks
                     li: a(href=link.href)= link.label
-                if user
+                if user.canAccessKeystone
                     li: a(href="/keystone") Open Keystone
+                if user
                     li: a(href="/keystone/signout") Sign Out
                 else
                     li: a(href="/keystone/signin") Sign In
