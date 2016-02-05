@@ -5,6 +5,7 @@
 var keystone = require('keystone'),
     _ = require('underscore'),
     Event = keystone.list('Event'),
+    Booth = keystone.list('Booth'),
     User = keystone.list('User');
  
 exports = module.exports = function(req, res) {
@@ -24,13 +25,40 @@ exports = module.exports = function(req, res) {
         }
         else{
             locals.isAuthorized = true;
-            Event.model.find()
-            .select('name num')
-            .where('participants')
-            .in([req.user._id])
-            .exec(function(err,events){
-                console.log(events);
-                locals.events = events;
+            locals.isSubmitted = false;
+            locals.errMsg = '';
+            Booth.model.find({user: req.user._id})
+            .exec(function(err,booth){
+                locals.poster = booth[0] ? booth[0].poster : '';
+                next();
+            });
+        }
+    });
+
+    view.on('post', function(next){
+        // ensure logged in
+        if (!req.user) {
+            return res.redirect('/keystone/signin');
+        }
+        else if(!req.user.isParticipant){
+            locals.isAuthorized = false;
+            locals.errorMsg = 'Not authorized';
+        }
+        else{
+            locals.isAuthorized = true;
+            locals.isSubmitted = false;
+            locals.errMsg = '';
+
+            Booth.model.findOneAndUpdate({user: req.user._id}, {$set: {poster: locals.formData.posterUrl}}, {new: true})
+            .exec(function(err,booth){
+                if(booth){
+                    locals.isSubmitted = true;
+                    locals.poster = booth.poster;
+                }
+                else{
+                    locals.errMsg = 'You have not been assigned to a booth/event.';
+                    locals.poster = '';
+                }
                 next();
             });
         }

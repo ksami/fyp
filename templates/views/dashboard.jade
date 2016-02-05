@@ -10,9 +10,19 @@ block content
     h4= errorMsg
 
     if isAuthorized
-        for event in events
-            div
-                h3 Event Name: #{event.name}
-                h4 Num of rooms available: #{event.num}
+        .container-fluid: .row: .col-md-6
+            if isSubmitted
+                h4 Successfully changed
+            if errMsg
+                h4= errMsg
+            | Poster URL is currently: #{poster?(poster.length==0?'None':poster):'None'}
+            |<br> To change it, submit the URL to the poster below
+            form(name='poster-details', method='post')
+                input(type='hidden', name='action', value='update-poster')
+                .form-group
+                    label(for='url') Poster URL
+                    input.form-control(type='text', name='posterUrl')
+                button.btn.btn-default(type='submit') Submit
+
 
     
