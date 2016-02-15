@@ -4,10 +4,12 @@
 
 require('dotenv').load();
 var socketio = require('socket.io');
+var binaryserver = require('binaryjs').BinaryServer;
 var keystone = require('keystone');
 var mongoose = require('mongoose');
 keystone.set('mongoose', mongoose);
 var debugsocket = require('debug')('vPoster:socket');
+var debugbs = require('debug')('vPoster:binaryjs');
 var debugdb = require('debug')('vPoster:db');
 var debug = require('debug')('vPoster:info');
 
@@ -63,9 +65,43 @@ keystone.set('nav', {
 keystone.start({
     onHttpServerCreated: function(){
         keystone.set('io', socketio.listen(keystone.httpServer));
+        keystone.set('bs', new binaryserver({
+            server: keystone.httpServer,
+            path: '/binary-endpoint'
+        }));
     },
 
     onStart: function(){
+        //establish BinaryJS connection
+        var bs = keystone.get('bs');
+        // New client opened
+        bs.on('connection', function(client){
+            debugbs('new client connected with id '+client.id);
+
+            // Received something from client
+            client.on('stream', function(stream, meta){
+                //todo: use meta to do rooming
+                debugbs('>>>Incoming audio stream');
+
+                // broadcast to all other clients
+                for(var id in bs.clients){
+                    if(bs.clients.hasOwnProperty(id)){
+                        var otherClient = bs.clients[id];
+                        if(otherClient != client){
+                            var send = otherClient.createStream(meta);
+                            stream.pipe(send);
+                        }
+                    }
+                }
+
+                stream.on('end', function() {
+                  debugbs('||| Audio stream ended');
+                });
+            });
+        });
+
+
+
         //establish SocketIO connection
         var io = keystone.get('io');
         var session = keystone.get('express session');

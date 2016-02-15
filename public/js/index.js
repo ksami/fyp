@@ -329,7 +329,7 @@ function scrollToBottom(id) {
 //////////////
 
 // Connect to Binary.js server
-var binaryclient = new BinaryClient('ws://localhost:9000');
+var binaryclient = new BinaryClient(location.origin.replace(/^http/, 'ws') + '/binary-endpoint');
 _mic = new MicController(binaryclient);
 _audio = new AudioController(binaryclient);
 
