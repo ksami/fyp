@@ -333,10 +333,10 @@ var binaryclient = new BinaryClient(location.origin.replace(/^http/, 'ws') + '/b
 _mic = new MicController(binaryclient);
 _audio = new AudioController(binaryclient);
 
-document.getElementById('record').onclick = function(){
+$('#record').mousedown(function(){
   //todo: when to start recording?
   _mic.startRecording();
-};
-document.getElementById('stop').onclick = function(){
+});
+$('#record').mouseup(function(){
   _mic.stopRecording();
-};
+});
