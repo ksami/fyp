@@ -7,9 +7,13 @@ block intro
 
 block content
     .container-fluid
-        #login
-            a(href='/keystone') Login
-        #event
-            a(href='/event/1') View Event
-        #createEvent
-            a(href='/createEvent') Create Event
+        if user
+            #login: a(href="/keystone/signout") Sign Out
+            #event: a(href='/event/1') View Event
+            ul
+              each event in events
+                li: a(href='/event/#{event.id}') #{event.name}
+            if user.isAdmin || user.isOrganiser
+                #createEvent: a(href='/createEvent') Create Event
+        else
+            #login: a(href="/keystone/signin") Sign In

@@ -22,7 +22,6 @@ exports = module.exports = function(req, res) {
     view.on('get', function(next){
         //TODO: login status?
         var eventid = req.params.id;
-        res.locals.eventname = eventid;
         req.session.eventid = eventid;
         req.session.user = {
             id: req.user._id,
@@ -31,8 +30,9 @@ exports = module.exports = function(req, res) {
 
         //find details of Event by querying db
         var Event = keystone.list('Event');
+        console.log(eventid);
         Event.model.findOne()
-        .where('name').equals(eventid)
+        .where('_id').equals(eventid)
         .populate({
             path: 'rooms',
             model: 'Room',
@@ -59,6 +59,7 @@ exports = module.exports = function(req, res) {
                 debugdb('+++ data found');
                 debugdb(event);
                 req.session.eventDetails = event;
+                res.locals.eventName = event.name;
                 next();
                 // socket.emit('eventDetails', event);
             }
