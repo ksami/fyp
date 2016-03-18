@@ -8,7 +8,7 @@ var TextSprite = require('./textSprite');
 function Person(id, name){
   var username = name || '<unknown>';
 
-  var bodyGeometry = new THREE.BoxGeometry(0.75,1.25,0.75);
+  var bodyGeometry = new THREE.BoxGeometry(0.75,1.25,0.30);
   var bodyMaterial = new THREE.MeshPhongMaterial({color: 0x336633});
 
   var headGeometry = new THREE.BoxGeometry(0.5,0.5,0.5);
