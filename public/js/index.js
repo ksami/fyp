@@ -219,6 +219,7 @@ socket.on('syn', function(){
 socket.on('syn-ack', function(user){
   console.log('connected');
   _user = user;
+  _user.socketid = socket.id;
 });
 socket.on('disconnect', function(){
   console.log('disconnected');
@@ -250,20 +251,30 @@ socket.on('event-details', function(event){
 
 socket.on('scene-state-change', function(update){
   if(scene){
-    if(!(_.contains(_persons, update.person.user.id))){
-      var newperson = new Person(update.person.user.id, update.person.user.name);
+    if(!(_.contains(_persons, update.person.user.socketid))){
+      var newperson = new Person(update.person.user.socketid, update.person.user.name);
       newperson.position.copy(update.person.position);
       newperson.rotation.copy(update.person.rotation);
       newperson.getObjectByName('head').rotation.copy(update.person.headRotation);
       scene.add(newperson);
-      _persons.push(update.person.user.id);
+      _persons.push(update.person.user.socketid);
     }
     else{
-      var updateperson = scene.getObjectByName(update.person.user.id);
+      var updateperson = scene.getObjectByName(update.person.user.socketid);
       updateperson.position.copy(update.person.position);
       updateperson.rotation.copy(update.person.rotation);
       updateperson.getObjectByName('head').rotation.copy(update.person.headRotation);
     }
+  }
+});
+
+socket.on('scene-person-disconnect', function(id){
+  if(_.contains(_persons, id)){
+    console.log(_persons);
+    var toRemove = scene.getObjectByName(id);
+    scene.remove(toRemove);
+    _persons = _.without(_persons, id);
+    console.log(_persons);
   }
 });
 

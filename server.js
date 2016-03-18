@@ -141,6 +141,7 @@ keystone.start({
 
             socket.on('disconnect', function(){
                 debugsocket('--- ' + socket.id + ' disconnected');
+                socket.broadcast.to(socket.handshake.session.eventid).emit('scene-person-disconnect', socket.id.substr(2));
             });
         });
 
