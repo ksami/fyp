@@ -3,17 +3,18 @@
 extends ../layouts/base
  
 block intro
-    h1 intro!
+    h1 Welcome
 
 block content
     .container-fluid
         if user
-            #login: a(href="/keystone/signout") Sign Out
-            #event: a(href='/event/1') View Event
-            ul
-              each event in events
-                li: a(href='/event/#{event.id}') #{event.name}
+            #event.row: .col-md-3: .dropdown
+                button#dropdownMenu1.btn.btn-default.dropdown-toggle(type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true") View Event 
+                    span.caret
+                ul.dropdown-menu(aria-labelledby="dropdownMenu1")
+                    each event in events
+                        li: a(href="/event/#{event.id}") #{event.name}
             if user.isAdmin || user.isOrganiser
-                #createEvent: a(href='/createEvent') Create Event
+                #createEvent.row: .col-md-3: a.btn.btn-default(role="button" href="/createEvent") Create Event
         else
-            #login: a(href="/keystone/signin") Sign In
+            #login.row: .col-md-3: a(href="/keystone/signin") Sign In
