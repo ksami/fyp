@@ -51,7 +51,7 @@ keystone.set('signin redirect', function(user, req, res){
         url = '/dashboard';
     }
     else if(user.isPublic){
-        url = '/event/1';
+        url = '/';
     }
     res.redirect(url);
 });
