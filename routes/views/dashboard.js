@@ -29,7 +29,19 @@ exports = module.exports = function(req, res) {
             locals.errMsg = '';
             Booth.model.find({user: req.user._id})
             .exec(function(err,booth){
-                locals.poster = booth[0] ? booth[0].poster : '';
+                if(booth[0]){
+                    locals.name = booth[0].name;
+                    locals.poster = booth[0].poster;
+                    locals.audio = booth[0].audio;
+                    locals.video = booth[0].video;
+                }
+                else{
+                    locals.errMsg = 'You have not been assigned to a booth/event.';
+                    locals.name = '';
+                    locals.poster = '';
+                    locals.audio = '';
+                    locals.video = '';
+                }
                 next();
             });
         }
@@ -49,15 +61,29 @@ exports = module.exports = function(req, res) {
             locals.isSubmitted = false;
             locals.errMsg = '';
 
-            Booth.model.findOneAndUpdate({user: req.user._id}, {$set: {poster: locals.formData.posterUrl}}, {new: true})
+            Booth.model
+            .findOneAndUpdate({user: req.user._id}, {
+                $set: {
+                    name: locals.formData.projectName,
+                    poster: locals.formData.posterUrl,
+                    audio: locals.formData.audioUrl,
+                    video: locals.formData.videoUrl
+                }
+            }, {new: true})
             .exec(function(err,booth){
                 if(booth){
                     locals.isSubmitted = true;
+                    locals.name = booth.name;
                     locals.poster = booth.poster;
+                    locals.audio = booth.audio;
+                    locals.video = booth.video;
                 }
                 else{
                     locals.errMsg = 'You have not been assigned to a booth/event.';
+                    locals.name = '';
                     locals.poster = '';
+                    locals.audio = '';
+                    locals.video = '';
                 }
                 next();
             });

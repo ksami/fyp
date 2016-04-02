@@ -15,13 +15,25 @@ block content
                 h4 Successfully changed
             if errMsg
                 h4= errMsg
-            | Poster URL is currently: #{poster?(poster.length==0?'None':poster):'None'}
-            |<br> To change it, submit the URL to the poster below
+            p Name of project is currently: #{name?(name.length==0?'None':name):'None'}
+                |<br> Poster URL is currently: #{poster?(poster.length==0?'None':poster):'None'}
+                |<br> Audio URL is currently: #{audio?(audio.length==0?'None':audio):'None'}
+                |<br> Video URL is currently: #{video?(video.length==0?'None':video):'None'}
+            p To change, submit the form below.
             form(name='poster-details', method='post')
                 input(type='hidden', name='action', value='update-poster')
                 .form-group
-                    label(for='url') Poster URL
-                    input.form-control(type='text', name='posterUrl')
+                    label(for='projectName') Name of Project
+                    input.form-control(type='text', name='projectName', value='#{name||""}')
+                .form-group
+                    label(for='posterUrl') Poster URL
+                    input.form-control(type='text', name='posterUrl', value='#{poster||""}')
+                .form-group
+                    label(for='audioUrl') Audio URL
+                    input.form-control(type='text', name='audioUrl', value='#{audio||""}')
+                .form-group
+                    label(for='videoUrl') Video URL
+                    input.form-control(type='text', name='videoUrl', value='#{video||""}')
                 button.btn.btn-default(type='submit') Submit
 
 
