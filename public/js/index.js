@@ -32,6 +32,8 @@ var _event, _user;
 var _persons = [];  // all person/user ids in scene except self
 var container, scene, camera, renderer, controls;
 var keyboard = new THREEx.KeyboardState(document.getElementById('threejs'));
+var mouse = new THREE.Vector3();
+var raycaster = new THREE.Raycaster();
 var clock = new THREE.Clock();
 var _collidableMeshList = [];
 var person;
@@ -106,8 +108,37 @@ function update(){
   if(keyboard.pressed('d')){
     person.rotation.y -= turnArc;
   }
-  
+
 }
+
+
+function onMouseDown(event){
+  // update the picking ray with the camera and mouse position  
+  mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 , 0.5);
+  mouse.unproject(camera);
+  var vector = new THREE.Vector3();
+  camera.updateMatrixWorld();
+  vector.setFromMatrixPosition(camera.matrixWorld);
+  raycaster.set(vector, mouse.sub(vector).normalize()); 
+
+  // calculate objects intersecting the picking ray
+  var intersects = raycaster.intersectObjects(_collidableMeshList, true);
+  if(intersects.length>0){
+    console.log('click');
+
+    var material = new THREE.LineBasicMaterial({color: 0xff0000});
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(vector, intersects[0].point);
+    var line = new THREE.Line(geometry, material);
+    scene.add(line)
+  }
+  // if( intersects.length>0 && typeof intersects[0].object.name !== 'undefined' &&
+  //   (intersects[0].object.name === 'audio' || intersects[0].object.name === 'video') ){
+  //   console.log('click');
+  // }
+}
+
+window.addEventListener('mousedown', onMouseDown, false);
 
 
 
@@ -119,7 +150,6 @@ function setupScene(){
   var axisHelper = new THREE.AxisHelper(3);
   axisHelper.position.set(12,1,12);
   scene.add(axisHelper);
-
 
   // Camera
   //args: fov, aspect ratio, near, far

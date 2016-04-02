@@ -24,7 +24,6 @@ module.exports.detectCollision = function(obj, collidableMeshList){
             msh = node;
         }
     });
-    //todo: use bounding box of msh
     
     for (var vertexIndex = 0; vertexIndex < msh.geometry.vertices.length; vertexIndex++){       
         var localVertex = msh.geometry.vertices[vertexIndex].clone();
@@ -75,7 +74,7 @@ module.exports.getMeshes = function(obj){
  * @param {boolean} [opts.hasLight=true] - If true, creates a main light in the center of the room
  * @param {boolean} [opts.hasDoor=false] - If true, creates a door for the room
  * @param {boolean} [opts.isMirror=false] If true, rotates room by PI
- * @param {[String]} [opts.booths=[]] - URLs of posters to add to booths
+ * @param {[String]} [opts.booths=[]] - Booths with name, poster/audio/video URL
  * @return  {THREE.Object3D} room - Dummy room object to group walls and light
  */
 module.exports.createRoom = function(corner, length, height, breadth, opts){
@@ -122,33 +121,32 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     var wallBreadth2 = new THREE.Mesh(wallBreadthGeometry, wallMaterial);
 
     // Booths
-    //TODO: load textures from db posters
     if(opts.hasBooths && opts.booths.length>0){
         var margin = 4;
         var boothIdx = 0;
         var booths = opts.booths;
       
         for(var i=0; i<4 && boothIdx<booths.length; i++){
-            var booth = new Booth(booths[boothIdx++].poster);
+            var booth = new Booth(booths[boothIdx++]);
             booth.position.set(((i*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength1.add(booth);
         }
 
         for(var i=0; i<2 && boothIdx<booths.length; i++){
-            var booth = new Booth(booths[boothIdx++].poster);
+            var booth = new Booth(booths[boothIdx++]);
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth1.add(booth);
         }
 
         for(var i=0; i<2 && boothIdx<booths.length; i++){
-            var booth = new Booth(booths[boothIdx++].poster);
+            var booth = new Booth(booths[boothIdx++]);
             booth.position.set(((i*breadth/2)-(breadth/2-5/2))+margin, 0.1, 0.1);
             wallBreadth2.add(booth);
         }
 
         // wall with door
         for(var i=0; i<2 && boothIdx<booths.length; i++){
-            var booth = new Booth(booths[boothIdx++].poster);
+            var booth = new Booth(booths[boothIdx++]);
             booth.position.set((((i*3)*length/4)-(length/2-5/2))+margin, 0.1, 0.1);
             wallLength2.add(booth);   
         }

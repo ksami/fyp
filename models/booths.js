@@ -7,9 +7,11 @@ var keystone = require('keystone'),
 
 var Booth = new keystone.List('Booth');
 
-//TODO: poster is a placeholder
 Booth.add({
-    poster: { type: String, label: 'Poster' },
+    name: { type: String, label: 'Name of project' },
+    poster: { type: String, label: 'Poster URL' },
+    audio: { type: String, label: 'Audio URL' },
+    video: { type: String, label: 'Video URL' },
     user: { type: Types.Relationship, ref: 'User' }
 });
 
