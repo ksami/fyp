@@ -113,8 +113,9 @@ function update(){
 
 
 function onMouseDown(event){
-  // update the picking ray with the camera and mouse position  
-  mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 , 0.5);
+  // update the picking ray with the camera and mouse position
+  var canvas = document.getElementsByTagName('canvas')[0];
+  mouse.set( (event.clientX - canvas.offsetLeft) /canvas.width * 2 - 1, - (event.clientY - canvas.offsetTop) / canvas.height * 2 + 1 , 0.5);
   mouse.unproject(camera);
   var vector = new THREE.Vector3();
   camera.updateMatrixWorld();
@@ -123,8 +124,18 @@ function onMouseDown(event){
 
   // calculate objects intersecting the picking ray
   var intersects = raycaster.intersectObjects(_collidableMeshList, true);
+
+  //debug:
+  if(intersects.length>0){
+    var material = new THREE.LineBasicMaterial({color: 0xff0000});
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(vector, intersects[0].point);
+    var line = new THREE.Line(geometry, material);
+    scene.add(line);
+  }
+
   if( intersects.length>0 && typeof intersects[0].object.name !== 'undefined' &&
-    (intersects[0].object.name === 'audio' || intersects[0].object.name === 'video') ){
+    (intersects[0].object.name === 'audio' || intersects[0].object.name === 'video' || intersects[0].object.name === 'directory') ){
     console.log('click');
     window.open(intersects[0].object.url);
   }
@@ -157,7 +168,7 @@ function setupScene(){
   }
 
   // set size of canvas
-  renderer.setSize(window.innerWidth, window.innerHeight-90);
+  renderer.setSize(window.innerWidth-10, window.innerHeight-150);
 
   container = document.getElementById('threejs');
   container.appendChild(renderer.domElement);

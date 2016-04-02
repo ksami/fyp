@@ -72,7 +72,6 @@ module.exports.getMeshes = function(obj){
  * @param {Object=} opts - Options for creating the room
  * @param {boolean} [opts.hasBooths=true] - If true, creates 10 booths
  * @param {boolean} [opts.hasLight=true] - If true, creates a main light in the center of the room
- * @param {boolean} [opts.hasDoor=false] - If true, creates a door for the room
  * @param {boolean} [opts.isMirror=false] If true, rotates room by PI
  * @param {[String]} [opts.booths=[]] - Booths with name, poster/audio/video URL
  * @return  {THREE.Object3D} room - Dummy room object to group walls and light
@@ -82,10 +81,8 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     opts.booths = opts.booths || [];
     opts.hasBooths = typeof opts.hasBooths === 'undefined' ? true : opts.hasBooths;
     opts.hasLight = typeof opts.hasLight === 'undefined' ? true : opts.hasLight;
-    opts.hasDoor = typeof opts.hasDoor === 'undefined' ? false : opts.hasDoor;
     opts.isMirror = typeof opts.isMirror === 'undefined' ? false : opts.isMirror;
 
-    //TODO: leave space for door!
     var x = corner.x;
     var y = corner.y;
     var z = corner.z;
@@ -178,6 +175,23 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     room.add(wallBreadth1);
     room.add(wallBreadth2);
 
+
+    if(opts.hasBooths){
+        THREE.ImageUtils.crossOrigin = '';
+        var dirTexture = THREE.ImageUtils.loadTexture('../images/icon-directory.png');
+        dirTexture.mapS = dirTexture.mapT = THREE.RepeatWrapping;
+        dirTexture.minFilter = THREE.NearestFilter;
+
+        var dirGeometry = new THREE.PlaneBufferGeometry(1,1);
+        var dirMaterial = new THREE.MeshBasicMaterial({map: dirTexture});
+        var dir = new THREE.Mesh(dirGeometry, dirMaterial);
+
+        dir.name = 'directory';
+        dir.url = 'http://www.google.com';
+        dir.rotation.y = Math.PI;
+        dir.position.set(doorWidth+1.5,0,-0.1);
+        wallLength2.add(dir);
+    }
 
     return room;
 }
