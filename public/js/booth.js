@@ -1,7 +1,7 @@
 function Booth(obj){
-  var posterUrl = obj.poster || '../images/a4poster.png';
-  var audioUrl = obj.audio || '';
-  var videoUrl = obj.video || '';
+  var posterUrl = (!obj.poster || obj.poster==='') ? '../images/a4poster.png' : obj.poster;
+  var audioUrl = (!obj.audio || obj.audio==='') ? '' : obj.audio;
+  var videoUrl = (!obj.video || obj.video==='') ? '' : obj.video;
 
   THREE.ImageUtils.crossOrigin = '';
   var posterTexture = THREE.ImageUtils.loadTexture(posterUrl);
@@ -18,23 +18,27 @@ function Booth(obj){
   var posterMaterial = new THREE.MeshBasicMaterial({map: posterTexture});
   var poster = new THREE.Mesh(posterGeometry, posterMaterial);
 
-  var iconGeometry = new THREE.PlaneBufferGeometry(1,1);
-  var audioMaterial = new THREE.MeshBasicMaterial({map: audioTexture});
-  var videoMaterial = new THREE.MeshBasicMaterial({map: videoTexture});
-  var audio = new THREE.Mesh(iconGeometry, audioMaterial);
-  var video = new THREE.Mesh(iconGeometry, videoMaterial);
-  audio.url = audioUrl;
-  audio.name = 'audio';
-  video.url = videoUrl;
-  video.name = 'video';
-  
   var booth = new THREE.Object3D();
   booth.add(poster);
-  booth.add(audio);
-  booth.add(video);
-  audio.position.set(-4,-4.5,0);
-  video.position.set(-3,-4.5,0);
 
+  var iconGeometry = new THREE.PlaneBufferGeometry(1,1);
+  if(audioUrl !== ''){
+    var audioMaterial = new THREE.MeshBasicMaterial({map: audioTexture});
+    var audio = new THREE.Mesh(iconGeometry, audioMaterial);
+    audio.url = audioUrl;
+    audio.name = 'audio';
+    booth.add(audio);
+    audio.position.set(-3,-4.5,0);
+  }
+  if(videoUrl !== ''){
+    var videoMaterial = new THREE.MeshBasicMaterial({map: videoTexture});
+    var video = new THREE.Mesh(iconGeometry, videoMaterial);
+    video.url = videoUrl;
+    video.name = 'video';
+    booth.add(video);
+    video.position.set(-4,-4.5,0);
+  }
+  
   return booth;
 }
 

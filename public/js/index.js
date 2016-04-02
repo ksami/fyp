@@ -123,19 +123,11 @@ function onMouseDown(event){
 
   // calculate objects intersecting the picking ray
   var intersects = raycaster.intersectObjects(_collidableMeshList, true);
-  if(intersects.length>0){
+  if( intersects.length>0 && typeof intersects[0].object.name !== 'undefined' &&
+    (intersects[0].object.name === 'audio' || intersects[0].object.name === 'video') ){
     console.log('click');
-
-    var material = new THREE.LineBasicMaterial({color: 0xff0000});
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(vector, intersects[0].point);
-    var line = new THREE.Line(geometry, material);
-    scene.add(line)
+    window.open(intersects[0].object.url);
   }
-  // if( intersects.length>0 && typeof intersects[0].object.name !== 'undefined' &&
-  //   (intersects[0].object.name === 'audio' || intersects[0].object.name === 'video') ){
-  //   console.log('click');
-  // }
 }
 
 window.addEventListener('mousedown', onMouseDown, false);
