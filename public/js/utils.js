@@ -207,13 +207,13 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
         var material1 = new THREE.MeshBasicMaterial({map: texture1, side:THREE.DoubleSide});
         material1.transparent = true;
 
-        var roomNameTag = new THREE.Mesh(new THREE.PlaneGeometry(canvas1.width, canvas1.height), material1);
+        var roomNameTag = new THREE.Mesh(new THREE.PlaneBufferGeometry(canvas1.width, canvas1.height), material1);
         roomNameTag.position.set(x+length/2, y+height+2, z+breadth/2);
         roomNameTag.scale.set(0.1,0.1,0.1);
         if(opts.isMirror){
             roomNameTag.rotation.y = Math.PI;
         }
-        
+
         room.add(roomNameTag);
     }
 

@@ -205,6 +205,8 @@ function setupScene(){
   controls.maxPolarAngle = 2*Math.PI/3;
   controls.minAzimuthAngle = -Math.PI/3;
   controls.maxAzimuthAngle = Math.PI/3;
+  controls.minDistance = 1;
+  controls.maxDistance = 50;
   controls.target = new THREE.Vector3(0,1.2,0);
 
 
