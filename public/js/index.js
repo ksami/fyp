@@ -125,18 +125,18 @@ function onMouseDown(event){
   // calculate objects intersecting the picking ray
   var intersects = raycaster.intersectObjects(_collidableMeshList, true);
 
-  //debug:
-  if(intersects.length>0){
-    var material = new THREE.LineBasicMaterial({color: 0xff0000});
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(vector, intersects[0].point);
-    var line = new THREE.Line(geometry, material);
-    scene.add(line);
-    render();
-    setTimeout(function(){
-      scene.remove(line);
-    }, 2000);
-  }
+  //debug: click on 3d scene
+  // if(intersects.length>0){
+  //   var material = new THREE.LineBasicMaterial({color: 0xff0000});
+  //   var geometry = new THREE.Geometry();
+  //   geometry.vertices.push(vector, intersects[0].point);
+  //   var line = new THREE.Line(geometry, material);
+  //   scene.add(line);
+  //   render();
+  //   setTimeout(function(){
+  //     scene.remove(line);
+  //   }, 2000);
+  // }
 
   if(intersects.length>0 && typeof intersects[0].object.name !== 'undefined'){
     console.log('click');
@@ -160,9 +160,9 @@ function setupScene(){
   scene = new THREE.Scene();
 
   //debug: Axis
-  var axisHelper = new THREE.AxisHelper(3);
-  axisHelper.position.set(12,1,12);
-  scene.add(axisHelper);
+  // var axisHelper = new THREE.AxisHelper(3);
+  // axisHelper.position.set(12,1,12);
+  // scene.add(axisHelper);
 
   // Camera
   //args: fov, aspect ratio, near, far
@@ -191,7 +191,8 @@ function setupScene(){
 
   // Person
   person = new Person(_user.id, _user.name);
-  person.position.set(12,1,12);
+  person.position.set(5,1,BREADTH_HALL/2);
+  person.rotation.y = -Math.PI/2;
   camera.position.set(0,2,3);
   person.add(camera);
   scene.add(person);
