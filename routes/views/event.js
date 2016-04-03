@@ -59,9 +59,8 @@ exports = module.exports = function(req, res) {
                 debugdb('+++ data found');
                 debugdb(event);
                 req.session.eventDetails = event;
-                res.locals.eventName = event.name;
+                res.locals.event = event;
                 next();
-                // socket.emit('eventDetails', event);
             }
         }, function(err){
             debugdb('+++ db error');

@@ -3,6 +3,31 @@
 extends ../layouts/base
  
 block content
+    #modalDirectory.modal.fade(tabindex="-1" role="dialog" aria-labelledby="modalDirectoryLabel" aria-hidden="true")
+        .modal-dialog: .modal-content
+
+            .modal-header
+                button.close(type="button" data-dismiss="modal" aria-label="Close")
+                    span(aria-hidden="true")&times;
+                h4#modalDirectoryLabel.modal-title Directory
+
+            .modal-body
+                for room in event.rooms
+                    h4= room.idx===0?room.category:room.category+'-'+room.idx
+                    table.table.table-hover.table-condensed
+                        thead
+                            th.col-md-2 #
+                            th.col-md-10 Name
+                        tbody
+                            for booth, index in room.booths
+                                tr
+                                    td= index+1
+                                    td= booth.name?(booth.name.length===0?'(No Name)':booth.name):'(No Name)'
+
+            .modal-footer
+                button.btn.btn-default(type="button" data-dismiss="modal") Close
+
+
     h3#loading Loading...
     button#record Press and hold to talk
     #threejs(tabindex="1")
