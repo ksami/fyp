@@ -72,13 +72,15 @@ module.exports.getMeshes = function(obj){
  * @param {Object=} opts - Options for creating the room
  * @param {boolean} [opts.hasBooths=true] - If true, creates 10 booths
  * @param {boolean} [opts.hasLight=true] - If true, creates a main light in the center of the room
- * @param {boolean} [opts.isMirror=false] If true, rotates room by PI
+ * @param {boolean} [opts.isMirror=false] - If true, rotates room by PI
+ * @param {String} [opts.name=''] - Name of room displayed above room
  * @param {[String]} [opts.booths=[]] - Booths with name, poster/audio/video URL
  * @return  {THREE.Object3D} room - Dummy room object to group walls and light
  */
 module.exports.createRoom = function(corner, length, height, breadth, opts){
     opts = opts || {};
     opts.booths = opts.booths || [];
+    opts.name = opts.name || '';
     opts.hasBooths = typeof opts.hasBooths === 'undefined' ? true : opts.hasBooths;
     opts.hasLight = typeof opts.hasLight === 'undefined' ? true : opts.hasLight;
     opts.isMirror = typeof opts.isMirror === 'undefined' ? false : opts.isMirror;
@@ -193,28 +195,32 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
         wallLength2.add(dir);
 
 
-        // room name above room
-        var canvas1 = document.createElement('canvas');
-        var context1 = canvas1.getContext('2d');
-        context1.font = 'Bold 36px Arial';
-        context1.fillStyle = 'rgba(0,0,0,0.95)';
-        context1.fillText('Hello, world!', 0, 50);
-        
-        var texture1 = new THREE.Texture(canvas1);
-        texture1.needsUpdate = true;
-        texture1.minFilter = THREE.NearestFilter;
-          
-        var material1 = new THREE.MeshBasicMaterial({map: texture1, side:THREE.DoubleSide});
-        material1.transparent = true;
+        if(opts.name!==''){
+            // room name above room
+            var canvas1 = document.createElement('canvas');
+            var context1 = canvas1.getContext('2d');
+            context1.font = 'Bold 36px Arial';
+            context1.textAlign = 'center';
+            context1.textBaseline = 'middle';
+            context1.fillStyle = 'rgba(0,0,0,0.95)';
+            context1.fillText(opts.name, canvas1.width/2, canvas1.height/2);
+            
+            var texture1 = new THREE.Texture(canvas1);
+            texture1.needsUpdate = true;
+            texture1.minFilter = THREE.NearestFilter;
+              
+            var material1 = new THREE.MeshBasicMaterial({map: texture1, side:THREE.DoubleSide});
+            material1.transparent = true;
 
-        var roomNameTag = new THREE.Mesh(new THREE.PlaneBufferGeometry(canvas1.width, canvas1.height), material1);
-        roomNameTag.position.set(x+length/2, y+height+2, z+breadth/2);
-        roomNameTag.scale.set(0.1,0.1,0.1);
-        if(opts.isMirror){
-            roomNameTag.rotation.y = Math.PI;
+            var roomNameTag = new THREE.Mesh(new THREE.PlaneBufferGeometry(canvas1.width, canvas1.height), material1);
+            roomNameTag.position.set(x+length/2, y+height+2, z+breadth/2);
+            roomNameTag.scale.set(0.1,0.1,0.1);
+            if(opts.isMirror){
+                roomNameTag.rotation.y = Math.PI;
+            }
+            roomNameTag.name = 'nametag';
+            room.add(roomNameTag);
         }
-
-        room.add(roomNameTag);
     }
 
     return room;
