@@ -211,15 +211,25 @@ function setupScene(){
 
 
   // Rooms
-  for(var i=0; i<NUM_ROOMS/2; i++){
+  var roomIdx = 0;
+  for(var i=0; i<NUM_ROOMS/2; i++){  
     //create 2 rows with corridor in between
-    var room = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {booths: _event.rooms[i].booths});
+    var room = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,0), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {
+      booths: _event.rooms[roomIdx].booths,
+      name: _event.rooms[roomIdx].idx===0 ? _event.rooms[roomIdx].category : _event.rooms[roomIdx].category+'-'+_event.rooms[roomIdx].idx
+    });
     scene.add(room);
-    _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(room));
+    _collidableMeshList = _collidableMeshList.concat(_.filter(Utils.getMeshes(room), function(m){return m.name!=='nametag';}));
+    roomIdx++;
 
-    var room2 = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {booths: _event.rooms[i+1].booths, isMirror: true});
+    var room2 = Utils.createRoom(new THREE.Vector3(i*LENGTH_ROOM,0,BREADTH_ROOM+BREADTH_CORRIDOR), LENGTH_ROOM, HEIGHT_ROOM, BREADTH_ROOM, {
+      booths: _event.rooms[roomIdx].booths,
+      isMirror: true,
+      name: _event.rooms[roomIdx].idx===0 ? _event.rooms[roomIdx].category : _event.rooms[roomIdx].category+'-'+_event.rooms[roomIdx].idx
+    });
     scene.add(room2);
-    _collidableMeshList = _collidableMeshList.concat(Utils.getMeshes(room2));
+    _collidableMeshList = _collidableMeshList.concat(_.filter(Utils.getMeshes(room2), function(m){return m.name!=='nametag';}));
+    roomIdx++;
   }
 
 
