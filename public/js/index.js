@@ -132,6 +132,10 @@ function onMouseDown(event){
     geometry.vertices.push(vector, intersects[0].point);
     var line = new THREE.Line(geometry, material);
     scene.add(line);
+    render();
+    setTimeout(function(){
+      scene.remove(line);
+    }, 2000);
   }
 
   if(intersects.length>0 && typeof intersects[0].object.name !== 'undefined'){
@@ -143,7 +147,7 @@ function onMouseDown(event){
     else if(intersects[0].object.name === 'directory'){
       $('#modalDirectory').modal('show');
     }
-    
+
   }
 }
 
@@ -285,7 +289,7 @@ socket.on('event-details', function(event){
   /////////////
   init();
   run();
-
+  $('#modalDirectory').modal('show');
 });
 
 socket.on('scene-state-change', function(update){
