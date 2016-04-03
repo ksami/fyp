@@ -175,8 +175,9 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
     room.add(wallBreadth1);
     room.add(wallBreadth2);
 
-
+    
     if(opts.hasBooths){
+        // add directory icon outside room
         THREE.ImageUtils.crossOrigin = '';
         var dirTexture = THREE.ImageUtils.loadTexture('../images/icon-directory.png');
         dirTexture.mapS = dirTexture.mapT = THREE.RepeatWrapping;
@@ -187,10 +188,33 @@ module.exports.createRoom = function(corner, length, height, breadth, opts){
         var dir = new THREE.Mesh(dirGeometry, dirMaterial);
 
         dir.name = 'directory';
-        dir.url = 'http://www.google.com';
         dir.rotation.y = Math.PI;
         dir.position.set(doorWidth+1.5,0,-0.1);
         wallLength2.add(dir);
+
+
+        // room name above room
+        var canvas1 = document.createElement('canvas');
+        var context1 = canvas1.getContext('2d');
+        context1.font = 'Bold 36px Arial';
+        context1.fillStyle = 'rgba(0,0,0,0.95)';
+        context1.fillText('Hello, world!', 0, 50);
+        
+        var texture1 = new THREE.Texture(canvas1);
+        texture1.needsUpdate = true;
+        texture1.minFilter = THREE.NearestFilter;
+          
+        var material1 = new THREE.MeshBasicMaterial({map: texture1, side:THREE.DoubleSide});
+        material1.transparent = true;
+
+        var roomNameTag = new THREE.Mesh(new THREE.PlaneGeometry(canvas1.width, canvas1.height), material1);
+        roomNameTag.position.set(x+length/2, y+height+2, z+breadth/2);
+        roomNameTag.scale.set(0.1,0.1,0.1);
+        if(opts.isMirror){
+            roomNameTag.rotation.y = Math.PI;
+        }
+        
+        room.add(roomNameTag);
     }
 
     return room;
