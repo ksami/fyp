@@ -134,10 +134,16 @@ function onMouseDown(event){
     scene.add(line);
   }
 
-  if( intersects.length>0 && typeof intersects[0].object.name !== 'undefined' &&
-    (intersects[0].object.name === 'audio' || intersects[0].object.name === 'video' || intersects[0].object.name === 'directory') ){
+  if(intersects.length>0 && typeof intersects[0].object.name !== 'undefined'){
     console.log('click');
-    window.open(intersects[0].object.url);
+
+    if(intersects[0].object.name === 'audio' || intersects[0].object.name === 'video'){
+      window.open(intersects[0].object.url);
+    }
+    else if(intersects[0].object.name === 'directory'){
+      $('#modalDirectory').modal('show');
+    }
+    
   }
 }
 
