@@ -12,7 +12,7 @@ block content
                 h4#modalDirectoryLabel.modal-title Directory
 
             .modal-body
-                for room in event.rooms
+                for room in event.rooms.sort()
                     h4= room.idx===0?room.category:room.category+'-'+room.idx
                     table.table.table-hover.table-condensed
                         thead
