@@ -7,6 +7,7 @@ var socketio = require('socket.io');
 var binaryserver = require('binaryjs').BinaryServer;
 var keystone = require('keystone');
 var mongoose = require('mongoose');
+var _ = require('underscore');
 keystone.set('mongoose', mongoose);
 var debugsocket = require('debug')('vPoster:socket');
 var debugbs = require('debug')('vPoster:binaryjs');
@@ -74,29 +75,52 @@ keystone.start({
     onStart: function(){
         //establish BinaryJS connection
         var bs = keystone.get('bs');
+
+        var clientRooms = {};
+
         // New client opened
         bs.on('connection', function(client){
             debugbs('new client connected with id '+client.id);
 
-            // Received something from client
+            // Stream created
             client.on('stream', function(stream, meta){
-                //todo: use meta to do rooming
-                debugbs('>>>Incoming audio stream');
+                debugbs(meta);
+                if(meta.type === 'audio'){
+                    debugbs('>>>Incoming audio stream');
 
-                // broadcast to all other clients
-                for(var id in bs.clients){
-                    if(bs.clients.hasOwnProperty(id)){
+                    // broadcast to all other clients in same room
+                    var clientsToSend = _.keys(_.pick(clientRooms, function(val){
+                        return val === clientRooms[client.id];
+                    }));
+                    _.forEach(clientsToSend, function(id){
                         var otherClient = bs.clients[id];
                         if(otherClient != client){
                             var send = otherClient.createStream(meta);
                             stream.pipe(send);
                         }
+                    });
+
+                    stream.on('end', function() {
+                      debugbs('||| Audio stream ended');
+                    });
+
+                }
+                else if(meta.type === 'control'){
+                    debugbs('Incoming control message');
+                    
+                    if(meta.action === 'enter'){
+                        stream.on('data', function(data){
+                            debugbs(data);
+                            clientRooms[client.id] = data.room;
+                        });
+                    }
+                    else if(meta.action === 'leave'){
+                        stream.on('data', function(data){
+                            clientRooms[client.id] = undefined;
+                        });
                     }
                 }
 
-                stream.on('end', function() {
-                  debugbs('||| Audio stream ended');
-                });
             });
         });
 

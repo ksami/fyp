@@ -64,13 +64,13 @@ function MicController(client){
     }
   };
 
-  micController.startRecording = function () {
+  micController.startRecording = function (meta) {
 
     if (micController.recording === false) {
       console.log('>>> Start Recording');
 
       //open binary stream
-      micController.stream = client.createStream({data: 'audio'});
+      micController.stream = client.createStream(meta);
       micController.recording = true;
     }
 

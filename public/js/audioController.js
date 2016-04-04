@@ -11,7 +11,7 @@ function AudioController(client){
 
   audioController.speakerContext = new audioContext();
 
-  client.on('stream', function (stream) {
+  client.on('stream', function (stream, meta) {
     audioController.nextTime = 0;
     var init = false;
     var audioCache = [];

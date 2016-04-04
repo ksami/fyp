@@ -400,9 +400,19 @@ var binaryclient = new BinaryClient(location.origin.replace(/^http/, 'ws') + '/b
 _mic = new MicController(binaryclient);
 _audio = new AudioController(binaryclient);
 
+function enterChatroom(room){
+  binaryclient.send({room: room}, {type: 'control', action: 'enter'});
+}
+function leaveChatroom(){
+  binaryclient.send({}, {type: 'control', action: 'leave'});
+}
+setTimeout(function(){
+  enterChatroom('1');
+}, 5000);
+
 $('#record').mousedown(function(){
-  //todo: when to start recording?
-  _mic.startRecording();
+  _mic.startRecording({type: 'audio', room: '1'});
+  //todo: use this to set meta to send to server? on client.createStream
 });
 $('#record').mouseup(function(){
   _mic.stopRecording();
