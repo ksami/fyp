@@ -9,7 +9,7 @@ block content
             .modal-header
                 button.close(type="button" data-dismiss="modal" aria-label="Close")
                     span(aria-hidden="true") &times;
-                h4#modalDirectoryLabel.modal-title Directory
+                h4#modalDirectoryLabel.modal-title Directory for #{event.name}
 
             .modal-body
                 for room in event.rooms.sort()
@@ -28,18 +28,31 @@ block content
                 button.btn.btn-default(type="button" data-dismiss="modal") Close
 
 
+    #modalChat.modal.fade(tabindex="-1" role="dialog" aria-labelledby="modalChatLabel" aria-hidden="true")
+        .modal-dialog: .modal-content
+
+            .modal-header
+                button.close(type="button" data-dismiss="modal" aria-label="Close")
+                    span(aria-hidden="true") &times;
+                h4#modalChatLabel.modal-title Chat
+
+            .modal-body
+                button#record Press and hold to talk
+                #chatbox-wrapper
+                    #chatbox
+                        ul#chatmessages
+                    form#chatsubmit(tabindex="2")
+                        .input-group
+                            input#chat.form-control(type="text")
+                            span.input-group-btn
+                                button.btn.btn-default(type="submit") Send
+
+            .modal-footer
+                button.btn.btn-default(type="button" data-dismiss="modal") Close
+
+
     h3#loading Loading...
-    button#record Press and hold to talk
     #threejs(tabindex="1")
-    #chatbox-wrapper
-        #chatbox
-            ul#chatmessages
-                li Welcome to #{event.name}
-        form#chatsubmit(tabindex="2")
-            .input-group
-                input#chat.form-control(type="text")
-                span.input-group-btn
-                    button.btn.btn-default(type="submit") Send
 
 
 block css

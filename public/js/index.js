@@ -149,9 +149,9 @@ function onMouseDown(event){
       $('#modalDirectory').modal('show');
     }
     else if(obj.name === 'chat'){
-      console.log('entering chat');
-      console.log(obj.room);
+      console.log('entering chat', obj.room);
       enterChatroom(obj.room);
+      $('#modalChat').modal('show');
     }
 
   }
@@ -356,6 +356,18 @@ var intervalUpdate = setInterval(function(){
 //////////
 // Chat //
 //////////
+socket.on('chat-room-enter', function(data){
+  $('#chatmessages').append($('<li>').text(data.user+' has joined the room.').addClass('sysmsg'));
+  scrollToBottom('#chatmessages');
+});
+socket.on('chat-room-leave', function(data){
+  $('#chatmessages').append($('<li>').text(data.user+' has left the room.').addClass('sysmsg'));
+  scrollToBottom('#chatmessages');
+});
+socket.on('chat-audio-receive', function(data){
+  $('#chatmessages').append($('<li>').text(data.sender+' is talking...').addClass('sysmsg'));
+  scrollToBottom('#chatmessages');
+});
 socket.on('chat-text-receive', function(text){
   if(typeof text.class === 'undefined') {
     $('#chatmessages').append($('<li>').text(text.sender+'> '+text.msg));  
@@ -408,17 +420,22 @@ _audio = new AudioController(binaryclient);
 
 function enterChatroom(room){
   binaryclient.send({room: room}, {type: 'control', action: 'enter'});
+  socket.emit('enter-chat-room', {user: _user.name, room: room});
 }
 function leaveChatroom(){
   binaryclient.send({}, {type: 'control', action: 'leave'});
+  socket.emit('leave-chat-room', {user: _user.name});
+  $('#chatmessages').empty();
 }
-// setTimeout(function(){
-//   enterChatroom('1');
-// }, 5000);
+
+$('#modalChat').on('hidden.bs.modal', function(){
+  console.log('leaving chatroom');
+  leaveChatroom();
+});
 
 $('#record').mousedown(function(){
+  socket.emit('chat-audio-send', {sender: _user.name});
   _mic.startRecording({type: 'audio'});
-  //todo: use this to set meta to send to server? on client.createStream
 });
 $('#record').mouseup(function(){
   _mic.stopRecording();

@@ -154,8 +154,20 @@ keystone.start({
                 }, 1000);
             });
 
+            var currentChatroom = '';
+            socket.on('enter-chat-room', function(data){
+                socket.join(data.room);
+                currentChatroom = data.room;
+                io.to(currentChatroom).emit('chat-room-enter', {user: data.user});
+            });
+            socket.on('leave-chat-room', function(data){
+                socket.broadcast.to(currentChatroom).emit('chat-room-leave', {user: data.user});
+            });
             socket.on('chat-text-send', function(msg){
-                socket.broadcast.to(socket.handshake.session.eventid).emit('chat-text-receive', msg);
+                socket.broadcast.to(currentChatroom).emit('chat-text-receive', msg);
+            });
+            socket.on('chat-audio-send', function(msg){
+                io.to(currentChatroom).emit('chat-audio-receive', msg);
             });
 
             socket.on('person-state-change', function(person){
