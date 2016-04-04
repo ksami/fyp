@@ -140,12 +140,18 @@ function onMouseDown(event){
 
   if(intersects.length>0 && typeof intersects[0].object.name !== 'undefined'){
     console.log('click');
+    var obj = intersects[0].object;
 
-    if(intersects[0].object.name === 'audio' || intersects[0].object.name === 'video'){
-      window.open(intersects[0].object.url);
+    if(obj.name === 'audio' || obj.name === 'video'){
+      window.open(obj.url);
     }
-    else if(intersects[0].object.name === 'directory'){
+    else if(obj.name === 'directory'){
       $('#modalDirectory').modal('show');
+    }
+    else if(obj.name === 'chat'){
+      console.log('entering chat');
+      console.log(obj.room);
+      enterChatroom(obj.room);
     }
 
   }
@@ -406,12 +412,12 @@ function enterChatroom(room){
 function leaveChatroom(){
   binaryclient.send({}, {type: 'control', action: 'leave'});
 }
-setTimeout(function(){
-  enterChatroom('1');
-}, 5000);
+// setTimeout(function(){
+//   enterChatroom('1');
+// }, 5000);
 
 $('#record').mousedown(function(){
-  _mic.startRecording({type: 'audio', room: '1'});
+  _mic.startRecording({type: 'audio'});
   //todo: use this to set meta to send to server? on client.createStream
 });
 $('#record').mouseup(function(){

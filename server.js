@@ -92,6 +92,7 @@ keystone.start({
                     var clientsToSend = _.keys(_.pick(clientRooms, function(val){
                         return val === clientRooms[client.id];
                     }));
+                    debugbs(clientsToSend);
                     _.forEach(clientsToSend, function(id){
                         var otherClient = bs.clients[id];
                         if(otherClient != client){
