@@ -42,9 +42,3 @@ block content
                     ul
                         for user in failedCategories
                             li #{user.email}: #{user.category}
-
-block js
-    script.
-        $(document).ready(function() {
-            $('select').material_select();
-        });

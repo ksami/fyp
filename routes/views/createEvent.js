@@ -44,14 +44,14 @@ exports = module.exports = function(req, res) {
 
         var verifiedParticipants = [];
 
-        var eventName = locals.formData.name;
+        var eventName = locals.formData.name.trim();
 
         // check against this array
-        var categoriesCheck = _.map(locals.formData.categories.split('\n'), (cat)=>{return cat.trim().toUpperCase();});
+        var categoriesCheck = _.map(locals.formData.categories.trim().split('\n'), (cat)=>{return cat.trim().toUpperCase();});
 
         // csv contains participant details on each line in the format:
         // {email}, {category}
-        var csv = _.map(locals.formData.csv.split('\n'), (line)=>{
+        var csv = _.map(locals.formData.csv.trim().split('\n'), (line)=>{
             return _.map(line.split(','), (detail)=>{return detail.trim();});
         });
 
